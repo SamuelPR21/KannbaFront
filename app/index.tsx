@@ -1,6 +1,8 @@
-import { Redirect } from 'expo-router';
+import RootNavigation from './src/navigation/rootNavigation';
 
 export default function StartScreen() {
-  // Redirecciona inmediatamente a la pantalla de login, que es el inicio del Stack de autenticación.
-  return <Redirect href="/src/login" />;
+  
+  return(
+    <RootNavigation />
+  )
 }

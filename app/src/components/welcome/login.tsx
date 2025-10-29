@@ -1,13 +1,19 @@
+import { useNavigation } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Image, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Link } from 'expo-router';
+const imagenlogo = require('../../../../assets/images/welcome/loginimg/catlogo.jpg'); 
 
-// Usamos require para importar imágenes estáticas de manera eficiente
-const imagenlogo = require('../../assets/images/loginimg/catlogo.jpg'); 
+export default function LoginScreen({route}: any) {
 
-export default function LoginScreen() {
+  const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+
+  if(route?.params?.registered) {
+    Alert.alert("Exito", "¡Registro exitoso! Por favor, inicie sesión con sus nuevas credenciales.");
+    route.params.registered = false;
+  }
 
   const handleLogin = () => {
     // 1. Lógica de Validación (No Vacío)
@@ -88,11 +94,12 @@ export default function LoginScreen() {
         {/* --- SECCIÓN DE REGISTRO --- */}
         <View className="items-center">
           <Text className="text-gray-600 mb-2">¿No tienes cuenta?</Text>
-          <Link href="/src/register" asChild>
-            <TouchableOpacity className="bg-blue-800 rounded-md p-3 w-1/2 items-center shadow-sm">
+            <TouchableOpacity 
+              className="bg-blue-800 rounded-md p-3 w-1/2 items-center shadow-sm"
+              onPress={() => navigation.navigate('Register' as never)}
+            >
               <Text className="text-white font-bold">Regístrate</Text>
             </TouchableOpacity>
-          </Link>
         </View>
 
       </View>
