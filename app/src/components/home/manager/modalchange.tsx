@@ -1,16 +1,14 @@
 import { useState, useMemo } from 'react';
-import { 
-  Alert, Text, TextInput, TouchableOpacity, View, 
-  TouchableWithoutFeedback, Keyboard // <-- Importaciones para cerrar teclado
-} from 'react-native';
+import { Alert, Text, TextInput, TouchableOpacity, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useRouter } from 'expo-router'; 
 
+
 // --- CONSTANTES DE OPCIONES PARA DROPDOWNS ---
 const RESPONSIBLE_ITEMS = [
-  { label: 'Pepito1', value: 'Pepito1' },
-  { label: 'María G.', value: 'MariaG' },
-  { label: 'Carlos T.', value: 'CarlosT' },
+  { label: 'Diablo', value: 'user1' },
+  { label: 'Danna', value: 'user2' },
+  { label: 'Juanes', value: 'user3' },
 ];
 
 const STATUS_ITEMS = [
@@ -87,7 +85,6 @@ export default function ModalChange() {
     setErrors(newErrors);
     return valid;
   };
-
   const handleSubmit = () => {
     if (isModified && validateForm()) {
       const updatedTaskData = { 
@@ -101,14 +98,26 @@ export default function ModalChange() {
       setInitialTask(updatedTaskData); 
 
       Alert.alert(
-          "Cambios Guardados",
-          `La tarea "${taskName}" ha sido actualizada con éxito.`,
-          [{ text: "OK" }]
+        "Guardado",
+        "La tarea se ha guardado correctamente.",
+        [
+          { 
+            text: "OK", 
+            onPress: () => {
+              // CLAVE: Usar router.push() y pasar los datos como objeto de parámetros.
+              // Usamos router.push() para añadir la nueva vista a la pila.
+              router.push({
+                  pathname: '/src/components/home/colaborador/modalinfo', // Tu ruta de destino
+                  params: updatedTaskData // Los datos actualizados de la tarea
+              });
+            }
+          }
+        ]
       );
     } else if (!isModified) {
-         Alert.alert("Sin Cambios", "No se ha detectado ninguna modificación para guardar.");
+      Alert.alert("Sin Cambios", "No se ha detectado ninguna modificación para guardar.");
     } else {
-        Alert.alert("Error", "Por favor, complete todos los campos obligatorios.");
+      Alert.alert("Error", "Por favor, complete todos los campos obligatorios.");
     }
   };
   

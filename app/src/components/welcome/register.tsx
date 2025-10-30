@@ -2,7 +2,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
-import { Alert, Platform, SafeAreaView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { 
+    Alert, Platform, SafeAreaView, Text, TextInput, TouchableOpacity, View, 
+    TouchableWithoutFeedback, Keyboard, ScrollView // <-- Importaciones Clave
+} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 // Componente auxiliar para mostrar errores
@@ -10,7 +13,7 @@ const ErrorText = ({ message }: { message?: string }) =>
   message ? <Text className="text-red-600 text-xs mb-2 ml-1">{message}</Text> : null;
 
 export default function RegisterScreen() {
-  const navigation = useNavigation<any>(); // 👈 FIX: tipado genérico para evitar el error TS2345
+  const navigation = useNavigation<any>(); 
 
   // ESTADOS DEL FORMULARIO
   const [username, setUsername] = useState('');
@@ -25,7 +28,7 @@ export default function RegisterScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   // ERRORES
-  const [errors, setErrors] = useState<Record<string, string>>({});4
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // DROPDOWNS
   const [openPet, setOpenPet] = useState(false);
@@ -87,6 +90,7 @@ export default function RegisterScreen() {
 
   // REGISTRO
   const handleRegister = () => {
+    Keyboard.dismiss(); // Cierra el teclado antes de la alerta
     if (!validateAllFields()) {
       Alert.alert("Error de Formulario", "Por favor, corrija los errores y complete todos los campos.");
       return;
@@ -101,14 +105,15 @@ export default function RegisterScreen() {
       [
         { 
           text: "OK", 
-          onPress: () => navigation.navigate('Login', { registered: true }) // ✅ CORREGIDO
+          onPress: () => navigation.navigate('Login', { registered: true }) 
         }
       ]
     );
   };
 
   // ESTILOS
-  const inputStyle = "border-2 border-blue-300 rounded-lg p-3 w-full text-base text-gray-800 focus:border-blue-500";
+  // Usamos 'leading-normal' para prevenir el recorte de texto
+  const inputStyle = "border-2 border-blue-300 rounded-lg px-3 py-3 w-full text-base leading-tight text-gray-800 focus:border-blue-500";
   const inputContainerStyle = "mb-4";
   const dropdownStyle = { borderColor: '#93C5FD', borderWidth: 2, borderRadius: 8 };
 
@@ -133,6 +138,7 @@ export default function RegisterScreen() {
   };
 
   const showCalendar = () => {
+    Keyboard.dismiss(); // Cierra el teclado antes de abrir el calendario
     setShowDatePicker(true);
     setOpenPet(false);
     setOpenPurpose(false);
@@ -140,94 +146,109 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 justify-center items-center p-6 bg-white">
-        <View className="w-full max-w-md">
-          
-          {/* Inputs */}
-          {[
-            { placeholder: "Usuario", value: username, setter: setUsername, name: "username" },
-            { placeholder: "Email", value: email, setter: setEmail, name: "email", keyboardType: "email-address" },
-            { placeholder: "Nombre Completo", value: fullName, setter: setFullName, name: "fullName" },
-            { placeholder: "Contraseña", value: password, setter: setPassword, name: "password", secure: true },
-            { placeholder: "Oficio", value: occupation, setter: setOccupation, name: "occupation" },
-          ].map(({ placeholder, value, setter, name, keyboardType, secure }) => (
-            <View key={name} className={inputContainerStyle}>
-              <TextInput
-                className={inputStyle}
-                placeholder={placeholder}
-                placeholderTextColor="#6B7280"
-                value={value}
-                onChangeText={setter}
-                keyboardType={keyboardType as any}
-                secureTextEntry={secure}
-                onBlur={() => validateField(name, value)}
-              />
-              <ErrorText message={errors[name]} />
-            </View>
-          ))}
-
-          {/* Fecha */}
-          <View className={inputContainerStyle}>
-            <Text className="text-gray-700 mb-1 ml-1 text-xs">Fecha de Nacimiento</Text>
-            <TouchableOpacity className={`${inputStyle} flex-row justify-between items-center`} onPress={showCalendar}>
-              <Text className={birthDateDisplay === 'YYYY-MM-DD' ? 'text-gray-500' : 'text-gray-800'}>
-                {birthDateDisplay}
+      {/* CLAVE: Envolver el área de contenido con TouchableWithoutFeedback para cerrar el teclado */}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        {/* Usar ScrollView para permitir desplazamiento en formularios largos y evitar recortes */}
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }} 
+                    className="flex-1 bg-white"> 
+            
+            <View className="w-full max-w-md self-center">
+              
+              <Text className="text-3xl font-bold text-center text-blue-600 mb-8">
+                  Registro de Usuario
               </Text>
-              <MaterialCommunityIcons name="calendar-month-outline" size={24} color="#2563EB" />
-            </TouchableOpacity>
-            <ErrorText message={errors.birthDate} />
-          </View>
 
-          {showDatePicker && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={birthDate}
-              mode="date"
-              display="compact"
-              onChange={onChangeDate}
-            />
-          )}
+              {/* Inputs */}
+              {[
+                { placeholder: "Usuario", value: username, setter: setUsername, name: "username" },
+                { placeholder: "Email", value: email, setter: setEmail, name: "email", keyboardType: "email-address" },
+                { placeholder: "Nombre Completo", value: fullName, setter: setFullName, name: "fullName" },
+                { placeholder: "Contraseña", value: password, setter: setPassword, name: "password", secure: true },
+                { placeholder: "Oficio", value: occupation, setter: setOccupation, name: "occupation" },
+              ].map(({ placeholder, value, setter, name, keyboardType, secure }) => (
+                <View key={name} className={inputContainerStyle}>
+                  <TextInput
+                    className={inputStyle}
+                    placeholder={placeholder}
+                    placeholderTextColor="#6B7280"
+                    value={value}
+                    onChangeText={setter}
+                    keyboardType={keyboardType as any}
+                    secureTextEntry={secure}
+                    onBlur={() => validateField(name, value)}
+                  />
+                  <ErrorText message={errors[name]} />
+                </View>
+              ))}
 
-          {/* Dropdown Mascota */}
-          <Text className="text-blue-700 mb-1 ml-1 mt-3 font-semibold">Seleccione Mascota</Text>
-          <View style={{ zIndex: 5000, marginBottom: openPet ? 100 : 20 }}>
-            <DropDownPicker
-              open={openPet}
-              value={selectedPet}
-              items={itemsPet}
-              setOpen={setOpenPet}
-              setValue={setSelectedPet}
-              setItems={setItemsPet}
-              onOpen={() => setOpenPurpose(false)}
-              placeholder="Selecciona una mascota"
-              style={dropdownStyle}
-              dropDownContainerStyle={dropdownStyle}
-            />
-          </View>
+              {/* Fecha */}
+              <View className={inputContainerStyle}>
+                <Text className="text-blue-700 mb-1 ml-1 font-semibold">Fecha de Nacimiento</Text>
+                <TouchableOpacity className={`${inputStyle} flex-row justify-between items-center`} onPress={showCalendar}>
+                  <Text className={birthDateDisplay === 'YYYY-MM-DD' ? 'text-gray-500' : 'text-gray-800'}>
+                    {birthDateDisplay}
+                  </Text>
+                  <MaterialCommunityIcons name="calendar-month-outline" size={24} color="#2563EB" />
+                </TouchableOpacity>
+                <ErrorText message={errors.birthDate} />
+              </View>
 
-          {/* Dropdown Fines */}
-          <Text className="text-blue-700 mb-1 ml-1 font-semibold">Fines para usar la app</Text>
-          <View style={{ zIndex: 4000, marginBottom: openPurpose ? 120 : 20 }}>
-            <DropDownPicker
-              open={openPurpose}
-              value={selectedPurpose}
-              items={itemsPurpose}
-              setOpen={setOpenPurpose}
-              setValue={setSelectedPurpose}
-              setItems={setItemsPurpose}
-              onOpen={() => setOpenPet(false)}
-              placeholder="Selecciona un fin"
-              style={dropdownStyle}
-              dropDownContainerStyle={dropdownStyle}
-            />
-          </View>
+              {showDatePicker && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={birthDate}
+                  mode="date"
+                  display="compact"
+                  onChange={onChangeDate}
+                />
+              )}
 
-          {/* Botón */}
-          <TouchableOpacity className="bg-blue-600 rounded-lg p-4 w-full items-center mt-4 shadow-md" onPress={handleRegister}>
-            <Text className="text-white font-bold text-base">Registrarse</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+              {/* Dropdown Mascota */}
+              <Text className="text-blue-700 mb-1 ml-1 mt-3 font-semibold">Seleccione Mascota</Text>
+              {/* CLAVE: Eliminar zIndex y aumentar marginBottom cuando está abierto (ej. 250) */}
+              <View style={{ marginBottom: openPet ? 90 : 10 }}> 
+                <DropDownPicker
+                    onOpen={() => setOpenPurpose(false)}
+                    open={openPet}
+                    value={selectedPet}
+                    items={itemsPet}
+                    setOpen={setOpenPet}
+                    setValue={setSelectedPet}
+                    setItems={setItemsPet}
+                    
+                    placeholder="Selecciona una mascota"
+                    style={dropdownStyle}
+                    dropDownContainerStyle={dropdownStyle}
+                    listMode="SCROLLVIEW"
+                  />
+              </View>
+
+              {/* Dropdown Fines */}
+              <Text className="text-blue-700 mb-1 ml-1 font-semibold">Fines para usar la app</Text>
+              {/* CLAVE: Eliminar zIndex y aumentar marginBottom cuando está abierto (ej. 250) */}
+              <View style={{ marginBottom: openPurpose ? 120 : 10 }}>
+                <DropDownPicker
+                  onOpen={() => setOpenPet(false)}
+                  open={openPurpose}
+                  value={selectedPurpose}
+                  items={itemsPurpose}
+                  setOpen={setOpenPurpose}
+                  setValue={setSelectedPurpose}
+                  setItems={setItemsPurpose}
+                  placeholder="Selecciona un fin"
+                  style={dropdownStyle}
+                  dropDownContainerStyle={dropdownStyle}
+                  listMode="SCROLLVIEW"
+                />
+              </View>
+
+              {/* Botón de Registro */}
+              <TouchableOpacity className="bg-blue-600 rounded-lg p-4 w-full items-center mt-4 mb-20 shadow-md" onPress={handleRegister}>
+                <Text className="text-white font-bold text-base">Registrarse</Text>
+              </TouchableOpacity>
+            </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
-}   
+}
