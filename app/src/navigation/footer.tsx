@@ -1,11 +1,9 @@
-
+import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import * as React from 'react';
 import { Text, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
-// Pantallas simples de ejemplo
 function ProfileScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -38,7 +36,7 @@ export default function App() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarShowLabel: false, // Oculta los textos debajo de los íconos
+          tabBarShowLabel: false,
           tabBarStyle: {
             backgroundColor: '#fff',
             height: 70,
@@ -53,14 +51,14 @@ export default function App() {
             } else if (route.name === 'Home') {
               iconName = focused ? 'home' : 'home-outline';
             } else if (route.name === 'Logout') {
-              iconName = focused ? 'log-out' : 'log-out-outline';
+              iconName = focused ? 'exit' : 'exit-outline';
             }
 
             return (
               <Ionicons
-                name={iconName}
-                size={30}
-                color={focused ? 'tomato' : 'gray'}
+                name={'help-circle-outline'}
+                size={30}           // puedes usar el 'size' que te pasa React Navigation si prefieres
+                color={focused ? 'tomato' : 'gray'} // o usa 'color'
               />
             );
           },

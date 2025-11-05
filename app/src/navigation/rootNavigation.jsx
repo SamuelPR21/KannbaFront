@@ -1,9 +1,9 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
+import ModalInfoScreen from "../components/home/colaborador/modalinfo";
+import ModalChangeScreen from "../components/home/manager/modalchange";
 import LoginScreen from "../components/welcome/login";
 import RegisterScreen from "../components/welcome/register";
-import ModalChangeScreen from "../components/home/manager/modalchange";
-import ModalInfoScreen from "../components/home/colaborador/modalinfo";
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigation() {

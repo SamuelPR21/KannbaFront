@@ -1,6 +1,6 @@
 import { useNavigation } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, SafeAreaView, Text, TextInput, TouchableOpacity, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { Alert, Image, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
 const imagenlogo = require('../../../../assets/images/welcome/loginimg/catlogo.jpg'); 
 
