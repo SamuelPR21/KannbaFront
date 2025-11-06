@@ -1,19 +1,22 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useState } from 'react';
-import { 
-    Alert, Platform, SafeAreaView, Text, TextInput, TouchableOpacity, View, 
-    TouchableWithoutFeedback, Keyboard, ScrollView // <-- Importaciones Clave
-} from 'react-native';
+import { Alert, Keyboard, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { RootStackParamList } from "../../navigation/types";
 
-// Componente auxiliar para mostrar errores
+
+
+
 const ErrorText = ({ message }: { message?: string }) => 
   message ? <Text className="text-red-600 text-xs mb-2 ml-1">{message}</Text> : null;
 
 export default function RegisterScreen() {
-  const navigation = useNavigation<any>(); 
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const goToLogin  = () => navigation.navigate("Login")
 
   // ESTADOS DEL FORMULARIO
   const [username, setUsername] = useState('');
@@ -90,7 +93,7 @@ export default function RegisterScreen() {
 
   // REGISTRO
   const handleRegister = () => {
-    Keyboard.dismiss(); // Cierra el teclado antes de la alerta
+    Keyboard.dismiss(); 
     if (!validateAllFields()) {
       Alert.alert("Error de Formulario", "Por favor, corrija los errores y complete todos los campos.");
       return;
@@ -102,13 +105,9 @@ export default function RegisterScreen() {
     Alert.alert(
       "Registro Exitoso",
       "Tu cuenta ha sido creada correctamente.",
-      [
-        { 
-          text: "OK", 
-          onPress: () => navigation.navigate('Login', { registered: true }) 
-        }
-      ]
     );
+
+    goToLogin()
   };
 
   // ESTILOS

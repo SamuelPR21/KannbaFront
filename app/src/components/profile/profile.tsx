@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import Footer from "../../navigation/footer";
 
 export default function PerfilUsuario() {
   const [proyectoSeleccionado, setProyectoSeleccionado] = useState("Proyecto 4");
@@ -18,7 +17,7 @@ export default function PerfilUsuario() {
   ];
 
   return (
-    <ScrollView className="flex-1 bg-white p-6">
+    <ScrollView className="flex-1 bg-blue-50 pt-16 px-4 pb-16">
       {/* Información del usuario */}
       <View className="flex-row items-start justify-between mb-6">
         <View className="flex-col ml-2">
@@ -67,8 +66,6 @@ export default function PerfilUsuario() {
         ))}
       </View>
 
-      {/* Footer */}
-      <Footer />
     </ScrollView>
   );
 }

@@ -1,8 +1,12 @@
-import RootNavigation from './src/navigation/rootNavigation';
+import React from "react";
+import RootNavigation from "./src/navigation/rootNavigation";
+
 
 export default function StartScreen() {
   
   return(
-    <RootNavigation />
+
+      <RootNavigation />
+    
   )
 }
