@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import Home from '../components/home/mainHome';
-import Pet from '../components/Pet/main';
+import Pet from '../components/Pet/mainPet';
 import Profile from '../components/profile/profile';
 import { TabParamList } from "../navigation/types";
 
