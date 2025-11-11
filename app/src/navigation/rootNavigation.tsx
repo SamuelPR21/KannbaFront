@@ -4,6 +4,9 @@ import ModalInfoScreen from "../components/home/components/colaborador/modalinfo
 import ModalChangeScreen from "../components/home/components/manager/modalchange";
 import HomeProyecto from "../components/home/components/Proyecto/homeProyecto";
 import HomeTablero from "../components/home/components/Tablero/homeTablero";
+import IntoToProyectColaborador from "../components/profile/componets/intoProyect/colaborador";
+import IntoToProyectManger from "../components/profile/componets/intoProyect/manager";
+import Profile from "../components/profile/profile";
 import LoginScreen from "../components/welcome/login";
 import RegisterScreen from "../components/welcome/register";
 import Footer from "./footer";
@@ -51,6 +54,21 @@ export default function RootNavigation() {
             <Stack.Screen
                 name="HomeTablero"
                 component={HomeTablero}
+                options={{headerShown: false}}
+            />
+            <Stack.Screen
+                name="IntoToProyectManger"
+                component={IntoToProyectManger}
+                options={{headerShown: false}}
+            />
+            <Stack.Screen
+                name="IntoToProyectColaborador"
+                component={IntoToProyectColaborador}
+                options={{headerShown: false}}  
+            />
+            <Stack.Screen
+                name="Profile"
+                component={Profile}
                 options={{headerShown: false}}
             />
 

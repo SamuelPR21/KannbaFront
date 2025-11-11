@@ -204,7 +204,6 @@ export default function RegisterScreen() {
 
               {/* Dropdown Mascota */}
               <Text className="text-blue-700 mb-1 ml-1 mt-3 font-semibold">Seleccione Mascota</Text>
-              {/* CLAVE: Eliminar zIndex y aumentar marginBottom cuando está abierto (ej. 250) */}
               <View style={{ marginBottom: openPet ? 90 : 10 }}> 
                 <DropDownPicker
                     onOpen={() => setOpenPurpose(false)}
