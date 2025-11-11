@@ -1,9 +1,15 @@
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { RootStackParamList } from "../../navigation/types";
+
 
 export default function PerfilUsuario() {
   const [proyectoSeleccionado, setProyectoSeleccionado] = useState("Proyecto 4");
 
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const goToIntoProyectManager = () => navigation.navigate("IntoToProyectManger")
   const proyectos = [
     "Proyecto 1",
     "Proyecto 2",
@@ -44,7 +50,7 @@ export default function PerfilUsuario() {
         {proyectos.map((proyecto, index) => (
           <TouchableOpacity
             key={index}
-            onPress={() => setProyectoSeleccionado(proyecto)}
+            onPress={goToIntoProyectManager}
             className={`p-3 ${
               proyectoSeleccionado === proyecto
                 ? "bg-blue-500"
