@@ -6,7 +6,22 @@ import { RootStackParamList } from "../../navigation/types";
 
 
 export default function PerfilUsuario() {
-  const [proyectoSeleccionado, setProyectoSeleccionado] = useState("Proyecto 4");
+  const TAREAS_COMPLETADAS_PERCENT = 34;
+
+  const [currentView, setCurrentView] = useState<ProjectView>('assigned');
+  const navigation = useNavigation<any>();
+
+  // --- Datos de Prueba ---
+  const DUMMY_PROJECTS = Array.from({ length: 15 }, (_, i) => ({
+      id: `proj${i + 1}`,
+      title: `Proyecto Asignado  ${i + 1}`,
+  }));
+  
+  const DUMMY_PERSONAL_PROJECTS = Array.from({ length: 15 }, (_, i) => ({
+      id: `personal_proj${i + 1}`,
+      title: `Proyecto Personal  ${i + 1}`,
+  }));
+  // -----------------------
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const goToIntoProyectManager = () => navigation.navigate("IntoToProyectManger")
@@ -23,9 +38,10 @@ export default function PerfilUsuario() {
   ];
 
   return (
-    <ScrollView className="flex-1 bg-blue-50 pt-16 px-4 pb-16">
-      {/* Información del usuario */}
-      <View className="flex-row items-start justify-between mb-6">
+    <SafeAreaView className="flex-1 bg-blue-50 pt-16 px-4 pb-16">
+      
+      {/* ... (Información del usuario) ... */}
+      <View className="flex-row items-start justify-between mb-6 pt-10">
         <View className="flex-col ml-2">
           <Text className="text-lg font-semibold text-gray-800">Juan Tenorio</Text>
           <Text className="text-gray-600 text-base">66 años</Text>
@@ -33,17 +49,22 @@ export default function PerfilUsuario() {
         </View>
       </View>
 
-      {/* Tareas completadas */}
-      <Text className="text-lg font-semibold text-gray-800 mb-2">
-        Tareas completadas
-      </Text>
-
-      {/* Barra de progreso hecha con NativeWind */}
-      <View className="w-full h-2 bg-gray-300 rounded-full mb-2">
-        <View className="h-2 bg-blue-600 rounded-full w-[32%]" />
-      </View>
-
-      <Text className="text-center text-blue-600 mb-6">32%</Text>
+      {/* BARRA DE PROGRESO */}
+      <ProgressBar progress={TAREAS_COMPLETADAS_PERCENT} />
+      
+    {/* --- CONTENEDOR DE BOTONES DE VISTA --- */}
+      <View className="flex-row justify-start mb-3 mt-4 gap-2"> 
+          
+          {/* 1. BOTÓN PROYECTOS (ASIGNADOS) */}
+          <TouchableOpacity 
+              onPress={showAssignedProjects} // 💡 Cambia la vista
+              className={`${currentView === 'assigned' ? 'bg-blue-600' : 'bg-blue-300'} ${baseBtnClass}`}
+          >
+              <MaterialCommunityIcons name="view-dashboard-outline" size={20} color="white" />
+              <Text className="text-white font-semibold text-sm ml-2">
+                  Proyectos
+              </Text>
+          </TouchableOpacity>
 
       {/* Lista de proyectos */}
       <View className="border border-gray-400 rounded-lg">
@@ -59,19 +80,29 @@ export default function PerfilUsuario() {
                 : "bg-white"
             }`}
           >
-            <Text
-              className={`text-base ${
-                proyectoSeleccionado === proyecto
-                  ? "text-white font-semibold"
-                  : "text-gray-800"
-              }`}
-            >
-              {proyecto}
-            </Text>
+              <MaterialCommunityIcons name="plus" size={20} color="white" />
+              <Text className="text-white font-semibold text-sm ml-1">
+                  Proyectos personales
+              </Text>
           </TouchableOpacity>
-        ))}
-      </View>
 
-    </ScrollView>
+      </View>
+      {/* Fin del Contenedor de Botones */}
+
+      {/* --- RENDERIZACIÓN CONDICIONAL DE LA LISTA --- */}
+      {currentView === 'assigned' && (
+          <ProjectList 
+              projects={DUMMY_PROJECTS} 
+          /> 
+      )}
+
+      {currentView === 'personal' && (
+          <PersonalProjectList 
+              personalProjects={DUMMY_PERSONAL_PROJECTS} // Asegúrate de que el prop se llame personalProjects
+          /> 
+      )}
+      
+      <LogoutBtn onLogout={handleLogout} />
+    </SafeAreaView>
   );
 }
