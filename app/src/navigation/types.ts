@@ -4,8 +4,8 @@ export type RootStackParamList = {
     Tab: undefined;
     ModalInfo: undefined;
     ModalChange: undefined;
-    HomeProyecto: undefined
-    HomeTablero: undefined
+    HomeProyecto: undefined;
+    HomeTablero: undefined;
   };
 
 
