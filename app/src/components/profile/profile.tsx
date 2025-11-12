@@ -1,15 +1,9 @@
-import React, { useState } from "react"; // 💡 Importar useState
-import { Text, TouchableOpacity, View } from "react-native";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import ProgressBar from "./components/progressbar"; // Barra de Progreso
-import ProjectList from "./components/pojectlist"; // Lista de Proyectos Asignados
-import PersonalProjectList from "./components/personalpjlist"; // 💡 Importar lista personal
-import LogoutBtn from "./components/logoutbtn"; //Importar botón de cierre de sesión
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { RootStackParamList } from "../../navigation/types";
 
-// Definición de tipos de vista para mayor claridad
-type ProjectView = 'assigned' | 'personal';
 
 export default function PerfilUsuario() {
   const TAREAS_COMPLETADAS_PERCENT = 34;
@@ -29,25 +23,19 @@ export default function PerfilUsuario() {
   }));
   // -----------------------
 
-  // Función para cambiar a Proyectos Asignados
-  const showAssignedProjects = () => {
-    setCurrentView('assigned');
-    // Si necesitas navegar a una pantalla completa, úsala aquí: navigation.navigate('ProjectListScreen');
-  };
-
-  // Función para cambiar a Proyectos Personales
-  const showPersonalProjects = () => {
-    setCurrentView('personal');
-    // Si necesitas navegar a una pantalla completa, úsala aquí: navigation.navigate('PersonalProjectsScreen');
-  };
-  
-  const handleLogout = () => {
-    console.log("Cerrando sesión...");
-    navigation.navigate('Login'); // Ajusta según tu configuración de navegación
-  };
-    
-  // Clase base para el estilo del botón
-  const baseBtnClass = "flex-1 flex-row items-center justify-center rounded-lg shadow-md px-4 py-2";
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const goToIntoProyectManager = () => navigation.navigate("IntoToProyectManger")
+  const proyectos = [
+    "Proyecto 1",
+    "Proyecto 2",
+    "Proyecto 3",
+    "Proyecto 4",
+    "Proyecto 5",
+    "Proyecto 6",
+    "Proyecto 7",
+    "Proyecto 8",
+    "Proyecto 9",
+  ];
 
   return (
     <SafeAreaView className="flex-1 bg-blue-50 pt-16 px-4 pb-16">
@@ -78,10 +66,19 @@ export default function PerfilUsuario() {
               </Text>
           </TouchableOpacity>
 
-          {/* 2. BOTÓN PROYECTOS PERSONALES */}
-          <TouchableOpacity 
-              onPress={showPersonalProjects} // 💡 Cambia la vista
-              className={`${currentView === 'personal' ? 'bg-green-600' : 'bg-green-300'} ${baseBtnClass}`}
+      {/* Lista de proyectos */}
+      <View className="border border-gray-400 rounded-lg">
+        {proyectos.map((proyecto, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={goToIntoProyectManager}
+            className={`p-3 ${
+              proyectoSeleccionado === proyecto
+                ? "bg-blue-500"
+                : index % 2 === 0
+                ? "bg-gray-100"
+                : "bg-white"
+            }`}
           >
               <MaterialCommunityIcons name="plus" size={20} color="white" />
               <Text className="text-white font-semibold text-sm ml-1">

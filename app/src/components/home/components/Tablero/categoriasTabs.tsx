@@ -1,9 +1,11 @@
 import { Text, TouchableOpacity, View } from "react-native";
 
+export type Categoria = "Back Log" | "To Do" | "Doing" | "Done";
+
 interface Props {
-  categorias: string[];
-  selectedCategory: string;
-  onSelect: (category: string) => void;
+  categorias: Categoria[];
+  selectedCategory: Categoria;
+  onSelect: (category: Categoria) => void;
 }
 
 export default function CategoriaTabs({ categorias, selectedCategory, onSelect }: Props) {

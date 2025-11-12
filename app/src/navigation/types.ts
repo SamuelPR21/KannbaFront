@@ -6,6 +6,9 @@ export type RootStackParamList = {
     ModalChange: undefined;
     HomeProyecto: undefined;
     HomeTablero: undefined;
+    IntoToProyectManger: undefined
+    IntoToProyectColaborador: undefined
+    Profile: undefined
   };
 
 
