@@ -25,7 +25,7 @@ export default function Colaborador() {
                 onSelect={setSelectedCategory}
             />
 
-            <ListaTareas rol="manager" filtroCategoria={selectedCategory} />
+            <ListaTareas rol="colaborador" filtroCategoria={selectedCategory} />
 
             <BottomBackProfile />
 

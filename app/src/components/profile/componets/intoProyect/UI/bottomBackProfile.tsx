@@ -7,7 +7,7 @@ import { RootStackParamList } from "../../../../../navigation/types";
 
 export default function BottomBackProfile() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const goToProfile = () => navigation.navigate("Profile");
+  const goToProfile = () => navigation.navigate("Tab");
 
   return (
     <View
