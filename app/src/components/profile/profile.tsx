@@ -1,23 +1,33 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React from "react";
+import React, { useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import { RootStackParamList } from "../../navigation/types";
 import LogoutBtn from "./componets/logoutbtn";
-import PersonalProjectList from "./componets/personalProjectList";
 import ProgressBar from "./componets/progressbar";
 import ProgressStatusSelector from "./componets/progressStatusSelector";
 import ProjectList from "./componets/projectList";
 import ProjectSwitchButtons from "./componets/projectSwitchButtons";
+import CreateTaskPersonalbtn from "./componets/taskPersonal/createTaskPersonalbtn";
+import ModalTaskPersonal from "./componets/taskPersonal/modalTaskPersonal";
+import PersonalProjectList from "./componets/taskPersonal/personalProjectList";
 import UserInfo from "./componets/userInfo";
 import { ProjectItem, StatusKey } from "./types";
 
 export default function Profile() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const [selectedStatus, setSelectedStatus] = React.useState<StatusKey>("backlog");
-  const [selectedList, setSelectedList] = React.useState<"projects" | "personal">("projects");
-  const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<StatusKey>("backlog");
+  const [selectedList, setSelectedList] = useState<"projects" | "personal">("projects");
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<ProjectItem | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  
+  const handleItemPress = (tarea: ProjectItem) => {
+    setSelectedTask(tarea);
+    setModalVisible(true);
+  };
+  
 
   const progressByStatus: Record<StatusKey, number> = {
     backlog: 18,
@@ -54,6 +64,16 @@ export default function Profile() {
     navigation.navigate("Login")
   }
 
+  const updateTask = (updatedTask: ProjectItem) => {
+    console.log("Task updated:", updatedTask);
+    // Add logic to update the task in your state or backend
+  }
+
+  const deleteTask = (taskId: string) => {
+    console.log("Task deleted:", taskId);
+    // Add logic to delete the task from your state or backend
+  }
+
 
   return (
     <SafeAreaView className="flex-1 bg-white pt-16 px-4">
@@ -78,7 +98,21 @@ export default function Profile() {
         {selectedList === "projects" ? (
           <ProjectList projects={DUMMY_PROJECTS} onItemPress={handleProjectPress} />
         ) : (
-          <PersonalProjectList personalProjects={DUMMY_PERSONAL} onItemPress={handleProjectPress} />
+          <>
+            <PersonalProjectList 
+              personalProjects={DUMMY_PERSONAL} 
+              onItemPress={handleItemPress}
+            />
+            <CreateTaskPersonalbtn />
+
+            <ModalTaskPersonal
+              visible={modalVisible}
+              tarea={selectedTask}
+              onClose={() => setModalVisible(false)}
+              onUpdate={updateTask}
+              onDelete={deleteTask}
+            />
+          </>
         )}
       </View>
 

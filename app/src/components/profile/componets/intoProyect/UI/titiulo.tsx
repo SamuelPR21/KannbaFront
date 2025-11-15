@@ -1,10 +1,18 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-export default function Titulo({ title, categoria }: { title: string; categoria: string }) {
-  return (
+interface TituloProps {
+    title?: string;
+    categoria?: string;
+  }
+
+export default function Titulo({ title, categoria }: TituloProps) {
+    const mostrarLinea = title && categoria;  
+    
+    return (
+
     <View className="bg-blue-100 rounded-2xl p-4 mb-8 shadow-md">
-      <Text className="text-4xl font-extrabold text-center text-blue-900 tracking-wide mb-2">
+      <Text className="text-4xl font-extrabold text-center text-blie-900 tracking-wide mb-2">
         {title}
       </Text>
 
@@ -15,4 +23,4 @@ export default function Titulo({ title, categoria }: { title: string; categoria:
       </Text>
     </View>
   );
-}
+}                               

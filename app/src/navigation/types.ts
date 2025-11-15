@@ -9,7 +9,8 @@ export type RootStackParamList = {
     IntoToProyectManger: undefined
     IntoToProyectColaborador: undefined
     Profile: undefined
-  };
+
+}
 
 
 export type TabParamList = {
