@@ -10,6 +10,7 @@ export default function HomeTablero() {
 
   const [selectedCategory, setSelectedCategory] = useState("To Do");
   const [selectedPriority, setSelectedPriority] = useState("Alta");
+  
 
   const { tareasFiltradas } = useTareas(selectedCategory, selectedPriority);
 
@@ -17,7 +18,7 @@ export default function HomeTablero() {
   return (
     <ScrollView className="flex-1 bg-blue-50 pt-14 px-4 pb-16">
       <CategoriasTabs
-        categorias={["To Do", "Doing", "Done"]}
+        categorias={["Back Log", "To Do", "Doing", "Done"]}
         selectedCategory={selectedCategory}
         onSelect={setSelectedCategory}
       />
