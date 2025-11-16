@@ -3,6 +3,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
 import { SafeAreaView, View } from "react-native";
 import { RootStackParamList } from "../../navigation/types";
+import AddProjectButton from "./componets/addProjectButton";
+import CreateProjectModal from "./componets/createProjectModalProps";
 import LogoutBtn from "./componets/logoutbtn";
 import PersonalProjectList from "./componets/personalProjectList";
 import ProgressBar from "./componets/progressbar";
@@ -18,6 +20,7 @@ export default function Profile() {
   const [selectedStatus, setSelectedStatus] = React.useState<StatusKey>("backlog");
   const [selectedList, setSelectedList] = React.useState<"projects" | "personal">("projects");
   const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = React.useState(false);
 
   const progressByStatus: Record<StatusKey, number> = {
     backlog: 18,
@@ -27,7 +30,7 @@ export default function Profile() {
   };
 
 
-  const DUMMY_PROJECTS: ProjectItem[] = Array.from({ length: 9 }, (_, i) => ({
+  const DUMMY_PROJECTS: ProjectItem[] = Array.from({ length: 8 }, (_, i) => ({
     id: `proj_${i + 1}`,
     title: `Proyecto Asignado ${i + 1}`,
   }));
@@ -54,6 +57,11 @@ export default function Profile() {
     navigation.navigate("Login")
   }
 
+  const handleCreateProject = (projectName: string, category: string) => {
+    console.log("Nuevo proyecto creado:", projectName, "Categoría:", category);
+    setShowCreateModal(false);
+    // Aquí puedes enviar los datos a tu API
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white pt-16 px-4">
@@ -81,6 +89,16 @@ export default function Profile() {
           <PersonalProjectList personalProjects={DUMMY_PERSONAL} onItemPress={handleProjectPress} />
         )}
       </View>
+
+      {selectedList === "projects" && (
+        <AddProjectButton onPress={() => setShowCreateModal(true)} />
+      )}
+      
+      <CreateProjectModal
+        visible={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreate={handleCreateProject}
+      />
 
       <LogoutBtn onLogout={handleLogout} />
     </SafeAreaView>
