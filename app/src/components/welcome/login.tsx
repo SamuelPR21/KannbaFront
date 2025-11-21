@@ -2,15 +2,24 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, Keyboard, SafeAreaView, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import useAuth from "../../hook/useAuth";
 import { RootStackParamList } from "../../navigation/types";
 
 export default function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, "Login">>();
   const imagenlogo = require("../../../../assets/images/welcome/loginimg/catlogo.jpg");
+  const {login} = useAuth();
+  
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+
+
 
   useEffect(() => {
     if (route.params?.registered) {
@@ -23,16 +32,21 @@ export default function LoginScreen() {
   }, [route.params]);
 
   const goToRegister = () => navigation.navigate("Register");
-  const goToHome = () => navigation.navigate("Tab");
 
-  const handleLogin = () => {
-    if (!username.trim() || !password.trim()) {
-      Alert.alert("Error de Validación", "Por favor, complete ambos campos (Usuario y Contraseña).");
-      return;
+  const handleLogin = async () => {
+    if (!formData.email || !formData.password) {
+      return Alert.alert("Error de Validación", 
+        "Por favor, complete ambos campos (Email y Contraseña)."
+      );
     }
-
-    Alert.alert("Inicio de Sesión Exitoso", "¡Bienvenido de vuelta!");
-    goToHome();
+    try{
+      await login({
+        email: formData.email,
+        password: formData.password
+      });        
+    }catch(error){
+      console.error("Error en el manejo de login:", error);
+    }
   };
 
   return (
@@ -48,10 +62,10 @@ export default function LoginScreen() {
 
           <TextInput
             className="border-2 border-blue-300 rounded-lg p-3 w-full mb-4 text-base leading-tight text-gray-800 focus:border-blue-500"
-            placeholder="Usuario"
+            placeholder="Correo Electrónico"
             placeholderTextColor="#6B7280"
-            value={username}
-            onChangeText={setUsername}
+            value={formData.email}
+            onChangeText={(text) => setFormData({ ...formData, email: text })}
             autoCapitalize="none"
           />
 
@@ -59,8 +73,8 @@ export default function LoginScreen() {
             className="border-2 border-blue-300 rounded-lg p-3 w-full mb-6 text-base text-gray-800 focus:border-blue-500"
             placeholder="Contraseña"
             placeholderTextColor="#6B7280"
-            value={password}
-            onChangeText={setPassword}
+            value={formData.password}
+            onChangeText={(text) => setFormData({ ...formData, password: text })}
             secureTextEntry
           />
 

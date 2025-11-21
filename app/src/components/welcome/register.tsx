@@ -5,48 +5,54 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useState } from 'react';
 import { Alert, Keyboard, Platform, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { register } from '../../API/user';
 import { RootStackParamList } from "../../navigation/types";
-
-
 
 
 const ErrorText = ({ message }: { message?: string }) => 
   message ? <Text className="text-red-600 text-xs mb-2 ml-1">{message}</Text> : null;
+
 
 export default function RegisterScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const goToLogin  = () => navigation.navigate("Login")
 
-  // ESTADOS DEL FORMULARIO
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [password, setPassword] = useState('');
-  const [occupation, setOccupation] = useState('');
+  
+  const  [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    fullName: '',
+    password: '',
+    occupation: '',
+    birthDate: '',
+    purpose: 'estudio',
+  });
 
-  // ESTADOS DEL SELECTOR DE FECHA
-  const [birthDate, setBirthDate] = useState(new Date());
+  // Desestructuramos valores y creamos setters que actualizan formData
+  const { username, email, fullName, password, occupation } = formData;
+  const setUsername = (v: string) => setFormData(prev => ({ ...prev, username: v }));
+  const setEmail = (v: string) => setFormData(prev => ({ ...prev, email: v }));
+  const setFullName = (v: string) => setFormData(prev => ({ ...prev, fullName: v }));
+  const setPassword = (v: string) => setFormData(prev => ({ ...prev, password: v }));
+  const setOccupation = (v: string) => setFormData(prev => ({ ...prev, occupation: v }));
+
   const [birthDateDisplay, setBirthDateDisplay] = useState('YYYY-MM-DD');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [birthDate, setBirthDate] = useState<Date>(new Date());
 
-  // ERRORES
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // DROPDOWNS
   const [openPet, setOpenPet] = useState(false);
   const [selectedPet, setSelectedPet] = useState('gato');
-  const [itemsPet, setItemsPet] = useState([
-    { label: 'Gato', value: 'gato' },
-    { label: 'Perro', value: 'perro' },
-  ]);
+
 
   const [openPurpose, setOpenPurpose] = useState(false);
-  const [selectedPurpose, setSelectedPurpose] = useState('estudio');
+  const [selectedPurpose, setSelectedPurpose] = useState('ESTUDIO');
   const [itemsPurpose, setItemsPurpose] = useState([
-    { label: 'Estudio', value: 'estudio' },
-    { label: 'Trabajo', value: 'trabajo' },
-    { label: 'Personal', value: 'personal' },
+    { label: 'ESTUDIO', value: 'ESTUDIO' },
+    { label: 'TRABAJO', value: 'TRABAJO' },
+    { label: 'PERSONAL', value: 'PERSONAL' },
   ]);
 
   // VALIDACIONES
@@ -76,11 +82,13 @@ export default function RegisterScreen() {
 
   const validateAllFields = () => {
     const values: Record<string, string> = {
-      username,
-      email,
-      fullName,
-      password,
-      occupation,
+      username: formData.username,
+      email: formData.email,
+      fullName: formData.fullName,
+      password: formData.password,
+      occupation: formData.occupation,
+      birthDate: birthDateDisplay,
+      purpose: selectedPurpose,
     };
   
     const areFieldsValid = Object.entries(values).every(([field, value]) =>
@@ -99,9 +107,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    const formattedBirthDate = birthDate.toISOString().substring(0, 10);
-    console.log('Registering user with:', { username, email, fullName, password, occupation, formattedBirthDate, selectedPet, selectedPurpose });
-
+    const formattedBirthDate = birthDateDisplay.split('-').reverse().join('-');
     Alert.alert(
       "Registro Exitoso",
       "Tu cuenta ha sido creada correctamente.",
@@ -121,17 +127,16 @@ export default function RegisterScreen() {
       setShowDatePicker(false);
       return;
     }
-
     setShowDatePicker(Platform.OS === 'ios');
     const currentDate = selectedDate || birthDate;
-    setBirthDate(currentDate);
 
-    const formattedDate = currentDate.toLocaleDateString('es-ES', {
+    const formattedDate = (currentDate as Date).toLocaleDateString('es-ES', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
     }).replace(/\//g, '-');
 
+    setBirthDate(currentDate as Date);
     setBirthDateDisplay(formattedDate);
     if (Platform.OS !== 'ios') validateBirthDate();
   };
@@ -142,6 +147,41 @@ export default function RegisterScreen() {
     setOpenPet(false);
     setOpenPurpose(false);
   };
+
+  const submitRegister = async () => {
+    Keyboard.dismiss();
+
+    if (!validateAllFields()) {
+      Alert.alert("Error de Formulario", "Por favor, corrija los errores y complete todos los campos.");
+      return;
+    }
+
+    try {
+      const formattedBirthDate = birthDate.toISOString().substring(0, 10);
+
+      const payload = {
+        username: formData.username,
+        email: formData.email,
+        nameComlpete: formData.fullName,       
+        password: formData.password,
+        oficio: formData.occupation,
+        dateOfBirth: formattedBirthDate,
+        purpose: selectedPurpose,
+      };
+
+      const res = await register(payload);
+
+      if (res) {
+        Alert.alert("Registro Exitoso", "Tu cuenta ha sido creada correctamente.");
+        goToLogin();
+      } else {
+        Alert.alert("Error", "No se pudo registrar. Intenta de nuevo.");
+      }
+    } catch (error) {
+      Alert.alert("Error en el servidor", "No fue posible registrar el usuario.");
+    }
+  };
+
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -157,7 +197,6 @@ export default function RegisterScreen() {
                   Registro de Usuario
               </Text>
 
-              {/* Inputs */}
               {[
                 { placeholder: "Usuario", value: username, setter: setUsername, name: "username" },
                 { placeholder: "Email", value: email, setter: setEmail, name: "email", keyboardType: "email-address" },
@@ -202,25 +241,6 @@ export default function RegisterScreen() {
                 />
               )}
 
-              {/* Dropdown Mascota */}
-              <Text className="text-blue-700 mb-1 ml-1 mt-3 font-semibold">Seleccione Mascota</Text>
-              <View style={{ marginBottom: openPet ? 90 : 10 }}> 
-                <DropDownPicker
-                    onOpen={() => setOpenPurpose(false)}
-                    open={openPet}
-                    value={selectedPet}
-                    items={itemsPet}
-                    setOpen={setOpenPet}
-                    setValue={setSelectedPet}
-                    setItems={setItemsPet}
-                    
-                    placeholder="Selecciona una mascota"
-                    style={dropdownStyle}
-                    dropDownContainerStyle={dropdownStyle}
-                    listMode="SCROLLVIEW"
-                  />
-              </View>
-
               {/* Dropdown Fines */}
               <Text className="text-blue-700 mb-1 ml-1 font-semibold">Fines para usar la app</Text>
               {/* CLAVE: Eliminar zIndex y aumentar marginBottom cuando está abierto (ej. 250) */}
@@ -241,7 +261,9 @@ export default function RegisterScreen() {
               </View>
 
               {/* Botón de Registro */}
-              <TouchableOpacity className="bg-blue-600 rounded-lg p-4 w-full items-center mt-4 mb-20 shadow-md" onPress={handleRegister}>
+              <TouchableOpacity 
+                onPress={submitRegister}
+                className="bg-blue-600 rounded-lg p-4 w-full items-center mt-4 mb-20 shadow-md">
                 <Text className="text-white font-bold text-base">Registrarse</Text>
               </TouchableOpacity>
             </View>

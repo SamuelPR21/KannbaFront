@@ -1,7 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { SafeAreaView, View } from "react-native";
+import { AuthContext } from "../../context/userContext";
 import { RootStackParamList } from "../../navigation/types";
 import AddProjectButton from "./componets/addProjectButton";
 import CreateProjectModal from "./componets/createProjectModalProps";
@@ -18,6 +19,8 @@ import { ProjectItem, StatusKey } from "./types";
 
 export default function Profile() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const {logout} = useContext(AuthContext);
 
   const [selectedStatus, setSelectedStatus] = React.useState<StatusKey>("backlog");
   const [selectedList, setSelectedList] = React.useState<"projects" | "personal">("projects");
@@ -64,8 +67,8 @@ export default function Profile() {
     setSelectedList(list)
   }
 
-  const handleLogout = () => {
-    navigation.navigate("Login")
+  const handleLogout = async() => {
+    await logout();
   }
 
   const handleCreateProject = (projectName: string, category: string) => {
