@@ -6,7 +6,6 @@ import { PROJECTS } from "../utils/constans";
 export const createProject = async (data: any): Promise<any | null> => {
   try {
     const token = await AsyncStorage.getItem("token");
-    console.log("TOKEN ENCONTRADO:", token);
 
     if (!token) {
         console.log("❌ No hay token, devolviendo null");   

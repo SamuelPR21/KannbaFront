@@ -1,36 +1,61 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { getUserProjects } from "../../../API/user_proyect";
 import { RootStackParamList } from "../../../navigation/types";
 import { ProjectItem } from "../types";
 
-
-interface Props {
-  projects: ProjectItem[];
-  onItemPress: (id: string) => void;
-}
-
-export default function ProjectList({ projects, onItemPress }: Props) {
+export default function ProjectList() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
 
   const handleIntoToProyect = () => {
     navigation.navigate("IntoToProyectManger");
-  }
+  };
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem("user");
+        if (!storedUser) return;
+
+        const user = JSON.parse(storedUser);
+        console.log("👤 Usuario almacenado:", user);
+        const data = await getUserProjects(user.id);
+
+        if (data) {
+          console.log("Proyectos obtenidos:", data);
+          setProjects(data);
+        }
+      } catch (error) {
+        console.log("❌ Error al obtener proyectos:", error);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   return (
-
-
     <View className="border border-gray-200 rounded-lg p-2">
-      <Text className="text-lg font-semibold mb-2">Proyectos ({projects.length})</Text>
+      <Text className="text-lg font-semibold mb-2">
+        Proyectos ({projects.length})
+      </Text>
       <ScrollView nestedScrollEnabled style={{ maxHeight: 300 }}>
         {projects.map((p, i) => (
           <TouchableOpacity
-            key={p.id}
-            className={`p-3 rounded-md mb-2 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+            key={p.proyectId}
+            className={`p-3 rounded-md mb-2 ${
+              i % 2 === 0 ? "bg-white" : "bg-gray-50"
+            }`}
             onPress={handleIntoToProyect}
           >
-            <Text className="text-base font-medium text-gray-800">{p.title}</Text>
+            <Text className="text-base font-medium text-gray-800">
+              {p.proyectName}
+            </Text>
+            <Text className="text-xs text-gray-500">{p.categoryName}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

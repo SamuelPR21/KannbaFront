@@ -48,17 +48,6 @@ export default function Profile() {
     done: 46,
   };
 
-
-  const DUMMY_PROJECTS: ProjectItem[] = Array.from({ length: 8 }, (_, i) => ({
-    id: `proj_${i + 1}`,
-    title: `Proyecto Asignado ${i + 1}`,
-  }));
-
-  const DUMMY_PERSONAL: ProjectItem[] = Array.from({ length: 6 }, (_, i) => ({
-    id: `personal_${i + 1}`,
-    title: `Tarea Personal ${i + 1}`,
-  }));
-
   const handleProjectPress = (projectId: string) => {
     setSelectedProjectId(projectId);
     console.log("Selected Project ID:", projectId);
@@ -125,13 +114,10 @@ export default function Profile() {
 
       <View className="flex-1 mt-3">
         {selectedList === "projects" ? (
-          <ProjectList projects={DUMMY_PROJECTS} onItemPress={handleProjectPress} />
+          <ProjectList />
         ) : (
           <>
-            <PersonalProjectList 
-              personalProjects={DUMMY_PERSONAL} 
-              onItemPress={handleItemPress}
-            />
+            <PersonalProjectList/>
             <CreateTaskPersonalbtn />
 
             <ModalTaskPersonal

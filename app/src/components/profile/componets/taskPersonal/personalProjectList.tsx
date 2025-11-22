@@ -1,27 +1,42 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { ProjectItem } from "../../types";
+import { getTaskes } from "../../../../API/task";
+import { TaskPersonal } from "../../types";
 
-interface Props {
-  personalProjects: ProjectItem[];
-  onItemPress: (item: ProjectItem) => void;
-}
+export default function PersonalProjectList( ) {
 
+  const [personalTasks, setPersonalTasks] = React.useState<TaskPersonal[]>([]);
 
+  useEffect(() => {
+    const fetchPersonalProjects = async () => {
+      try {
+        const data = await getTaskes();
+        setPersonalTasks(data ?? []);
+      } catch (error) {
+        console.error("Error fetching personal projects:", error);
+      }
+    };
 
-export default function PersonalProjectList({ personalProjects, onItemPress }: Props) {
+    fetchPersonalProjects();
+  }, []); 
 
   return (
     <View className="border border-gray-200 rounded-lg p-2">
-      <Text className="text-lg font-semibold mb-2">Tareas Personales ({personalProjects.length})</Text>
+      <Text className="text-lg font-semibold mb-2">
+        Tareas Personales ({personalTasks.length})
+      </Text>
+
       <ScrollView nestedScrollEnabled style={{ maxHeight: 300 }}>
-        {personalProjects.map((p, i) => (
+        {personalTasks.map((p, i) => (
           <TouchableOpacity
             key={p.id}
-            className={`p-3 rounded-md mb-2 ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
-            onPress={() => onItemPress(p)}
-            >
-            <Text className="text-base font-medium text-gray-800">{p.title}</Text>
+            className={`p-3 rounded-md mb-2 ${
+              i % 2 === 0 ? "bg-white" : "bg-gray-50"
+            }`}
+          >
+            <Text className="text-base font-medium text-gray-800">
+              {p.name}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
