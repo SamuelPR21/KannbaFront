@@ -1,6 +1,8 @@
 import { Picker } from "@react-native-picker/picker";
 import React, { useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { getCategories } from "../../../API/categories";
+import { createProject } from "../../../API/proyect";
 
 interface CreateProjectModalProps {
   visible: boolean;
@@ -14,15 +16,45 @@ export default function CreateProjectModal({
   onCreate,
 }: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Categoria 1");
+  const [selectedCategory, setSelectedCategory] = useState<number |null> (null);
+  const [categories, setCategories] = useState<any[]>([]);
 
-  const handleCreate = () => {
-    if (projectName.trim()) {
-      onCreate(projectName, selectedCategory);
-      setProjectName("");
-      setSelectedCategory("Categoria 1");
+
+
+
+  const handleCreate = async () => {
+    if (projectName.trim() && selectedCategory !== null) {
+      try {
+        const response = await createProject({ name: projectName, category: selectedCategory });
+        if (response) {
+          onCreate(projectName, String(selectedCategory));
+          setProjectName("");
+          setSelectedCategory(null);
+          onClose();
+          alert("Proyecto creado exitosamente.");
+        }else {
+          alert("Error al crear el proyecto. Por favor, inténtelo de nuevo.");
+        }
+      }catch(error){
+        console.error("Error creating project:", error);
+        alert("Error al crear el proyecto. Por favor, inténtelo de nuevo.");
+      }
+    }else {
+      alert("Por favor, complete todos los campos.");
     }
   };
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data ?? []);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -49,9 +81,17 @@ export default function CreateProjectModal({
               itemStyle={{ color: "black", fontSize: 16, height: 56 }}
               style={{ height: 56 }}
             >
-              <Picker.Item label="Categoria 1" value="Categoria 1" />
-              <Picker.Item label="Categoria 2" value="Categoria 2" />
-              <Picker.Item label="Categoria 3" value="Categoria 3" />
+              {categories.length === 0 ? (
+                <Picker.Item label="Cargando categorías..." value="" />
+              ) : (
+                categories.map((cat) => (
+                  <Picker.Item
+                    key={cat.id}
+                    label={cat.name}       
+                    value={cat.id}           
+                  />
+                ))
+              )}
             </Picker>
           </View>
           

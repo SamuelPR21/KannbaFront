@@ -3,6 +3,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useContext, useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import { AuthContext } from "../../context/userContext";
+import useAuth from "../../hook/useAuth";
 import { RootStackParamList } from "../../navigation/types";
 import AddProjectButton from "./componets/addProjectButton";
 import CreateProjectModal from "./componets/createProjectModalProps";
@@ -17,11 +18,15 @@ import PersonalProjectList from "./componets/taskPersonal/personalProjectList";
 import UserInfo from "./componets/userInfo";
 import { ProjectItem, StatusKey } from "./types";
 
+
 export default function Profile() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const {logout} = useContext(AuthContext);
-
+  const { auth } = useAuth();
+  // Para depuración: ver estructura del payload del JWT
+  console.log('Auth context in Profile ->', auth);
+  
   const [selectedStatus, setSelectedStatus] = React.useState<StatusKey>("backlog");
   const [selectedList, setSelectedList] = React.useState<"projects" | "personal">("projects");
   const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
@@ -87,12 +92,24 @@ export default function Profile() {
     // Add logic to delete the task from your state or backend
   }
 
+  let today = new Date();
+  let birthDate = new Date(auth?.user?.dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  let monthDifference = today.getMonth() - birthDate.getMonth();
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-white pt-16 px-4">
       <UserInfo
-        fullName="Juan Tenorio"
-        username="Juan_T32"
-        age={66}
+        fullName={
+          auth?.user?.nameComplete ?? auth?.user?.nameComlpete ?? auth?.user?.name ?? ''
+        }
+        username={
+          auth?.user?.username ?? auth?.user?.usernam ?? auth?.user?.userName ?? ''
+        }
+        age={age}
       />
 
       <ProgressStatusSelector
