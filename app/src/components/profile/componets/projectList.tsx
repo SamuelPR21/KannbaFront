@@ -12,8 +12,15 @@ export default function ProjectList({ refreshFlag }: { refreshFlag?: number }) {
 
   const [projects, setProjects] = useState<ProjectItem[]>([]);
 
-  const handleIntoToProyect = () => {
-    navigation.navigate("IntoToProyectManger");
+  const handleIntoToProyect = (project: ProjectItem) => {
+    if(project.role === "MANAGER"){
+      navigation.navigate("IntoToProyectManger");
+    }else if (project.role === "COLABORADOR"){
+      navigation.navigate("IntoToProyectColaborador");
+    }else{
+      alert("Rol de proyecto no reconocido.");
+      return;
+    }
   };
 
   useEffect(() => {
@@ -50,7 +57,7 @@ export default function ProjectList({ refreshFlag }: { refreshFlag?: number }) {
             className={`p-3 rounded-md mb-2 ${
               i % 2 === 0 ? "bg-white" : "bg-gray-50"
             }`}
-            onPress={handleIntoToProyect}
+            onPress={() => handleIntoToProyect(p)}
           >
             <Text className="text-base font-medium text-gray-800">
               {p.proyectName}

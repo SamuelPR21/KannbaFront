@@ -12,31 +12,39 @@ interface CreateProjectModalProps {
 
 export default function CreateProjectModal({ visible, onClose, onCreate,}: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<number |null> (null);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(-1);
   const [categories, setCategories] = useState<any[]>([]);
 
   const handleCreate = async () => {
-    if (projectName.trim() && selectedCategory !== null) {
+    if (
+      projectName.trim() &&
+      selectedCategory !== null &&
+      selectedCategory !== -1
+    ) {
       try {
-        const response = await createProject({ name: projectName, category: selectedCategory });
+        const response = await createProject({
+          name: projectName,
+          categoryId: selectedCategory,
+        });
+
         if (response) {
           onCreate(projectName, String(selectedCategory));
           setProjectName("");
-          setSelectedCategory(null);
+          setSelectedCategory(-1);
           onClose();
           alert("Proyecto creado exitosamente.");
-        }else {
-          alert("Error al crear el proyecto. Por favor, inténtelo de nuevo.");
+        } else {
+          alert("Error al crear el proyecto.");
         }
-      }catch(error){
+      } catch (error) {
         console.error("Error creating project:", error);
-        alert("Error al crear el proyecto. Por favor, inténtelo de nuevo.");
+        alert("Error al crear el proyecto.");
       }
-    }else {
-      alert("Por favor, complete todos los campos.");
+    } else {
+      alert("Por favor seleccione una categoría válida.");
     }
   };
-
+  
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -70,21 +78,13 @@ export default function CreateProjectModal({ visible, onClose, onCreate,}: Creat
           <View className="border border-gray-300 rounded-lg mb-4 h-14 justify-center">
             <Picker
               selectedValue={selectedCategory}
-              onValueChange={setSelectedCategory}
-              itemStyle={{ color: "black", fontSize: 16, height: 56 }}
-              style={{ height: 56 }}
+              onValueChange={(value) => setSelectedCategory(value)}
             >
-              {categories.length === 0 ? (
-                <Picker.Item label="Cargando categorías..." value="" />
-              ) : (
-                categories.map((cat) => (
-                  <Picker.Item
-                    key={cat.id}
-                    label={cat.name}       
-                    value={cat.id}           
-                  />
-                ))
-              )}
+              <Picker.Item label="Seleccione una categoría..." value={-1} />
+
+              {categories.map((cat) => (
+                <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
+              ))}
             </Picker>
           </View>
           

@@ -6,9 +6,6 @@ import ListaIntegrantes from "./UI/listaIntegrantes";
 import ListaTareas from "./UI/listaTareas";
 import Titulo from "./UI/titiulo";
 
-
-
-
 export default function Colaborador() {
     const [selectedCategory, setSelectedCategory] = useState<Categoria>("To Do");
 
