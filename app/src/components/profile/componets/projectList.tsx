@@ -7,7 +7,7 @@ import { getUserProjects } from "../../../API/user_proyect";
 import { RootStackParamList } from "../../../navigation/types";
 import { ProjectItem } from "../types";
 
-export default function ProjectList() {
+export default function ProjectList({ refreshFlag }: { refreshFlag?: number }) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [projects, setProjects] = useState<ProjectItem[]>([]);
@@ -23,20 +23,20 @@ export default function ProjectList() {
         if (!storedUser) return;
 
         const user = JSON.parse(storedUser);
-        console.log("👤 Usuario almacenado:", user);
+        // Debug: mostrar id enviado
+        console.log('ProjectList fetching for user id ->', user.id);
         const data = await getUserProjects(user.id);
 
-        if (data) {
-          console.log("Proyectos obtenidos:", data);
-          setProjects(data);
-        }
+        if (data) setProjects(data);
       } catch (error) {
         console.log("❌ Error al obtener proyectos:", error);
       }
     };
 
     fetchProjects();
-  }, []);
+    const unsubscribe = navigation.addListener("focus", fetchProjects);
+    return unsubscribe;
+  }, [navigation, refreshFlag]);
 
   return (
     <View className="border border-gray-200 rounded-lg p-2">

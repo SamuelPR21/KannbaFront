@@ -1,5 +1,5 @@
 import { Picker } from "@react-native-picker/picker";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { getCategories } from "../../../API/categories";
 import { createProject } from "../../../API/proyect";
@@ -10,17 +10,10 @@ interface CreateProjectModalProps {
   onCreate: (projectName: string, category: string) => void;
 }
 
-export default function CreateProjectModal({
-  visible,
-  onClose,
-  onCreate,
-}: CreateProjectModalProps) {
+export default function CreateProjectModal({ visible, onClose, onCreate,}: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number |null> (null);
   const [categories, setCategories] = useState<any[]>([]);
-
-
-
 
   const handleCreate = async () => {
     if (projectName.trim() && selectedCategory !== null) {
@@ -44,7 +37,7 @@ export default function CreateProjectModal({
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchCategories = async () => {
       try {
         const data = await getCategories();

@@ -31,6 +31,7 @@ export default function Profile() {
   const [selectedList, setSelectedList] = React.useState<"projects" | "personal">("projects");
   const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = React.useState(false);
+  const [projectsRefresh, setProjectsRefresh] = React.useState(0);
 
   const [selectedTask, setSelectedTask] = useState<ProjectItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -68,6 +69,8 @@ export default function Profile() {
   const handleCreateProject = (projectName: string, category: string) => {
     console.log("Nuevo proyecto creado:", projectName, "Categoría:", category);
     setShowCreateModal(false);
+    // Incrementar flag para forzar recarga de la lista de proyectos
+    setProjectsRefresh((v) => v + 1);
     // Aquí puedes enviar los datos a tu API
   };
   
@@ -114,7 +117,7 @@ export default function Profile() {
 
       <View className="flex-1 mt-3">
         {selectedList === "projects" ? (
-          <ProjectList />
+          <ProjectList refreshFlag={projectsRefresh} />
         ) : (
           <>
             <PersonalProjectList/>
