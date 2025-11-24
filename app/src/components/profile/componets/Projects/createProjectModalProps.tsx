@@ -1,8 +1,8 @@
 import { Picker } from "@react-native-picker/picker";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { getCategories } from "../../../API/categories";
-import { createProject } from "../../../API/proyect";
+import { getCategories } from "../../../../API/categories";
+import { createProject } from "../../../../API/proyect";
 
 interface CreateProjectModalProps {
   visible: boolean;

@@ -1,16 +1,13 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useContext, useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import { AuthContext } from "../../context/userContext";
 import useAuth from "../../hook/useAuth";
-import { RootStackParamList } from "../../navigation/types";
-import AddProjectButton from "./componets/addProjectButton";
-import CreateProjectModal from "./componets/createProjectModalProps";
 import LogoutBtn from "./componets/logoutbtn";
 import ProgressBar from "./componets/progressbar";
 import ProgressStatusSelector from "./componets/progressStatusSelector";
-import ProjectList from "./componets/projectList";
+import AddProjectButton from "./componets/Projects/addProjectButton";
+import CreateProjectModal from "./componets/Projects/createProjectModalProps";
+import ProjectList from "./componets/Projects/projectList";
 import ProjectSwitchButtons from "./componets/projectSwitchButtons";
 import CreateTaskPersonalbtn from "./componets/taskPersonal/createTaskPersonalbtn";
 import ModalTaskPersonal from "./componets/taskPersonal/modalTaskPersonal";
@@ -20,7 +17,6 @@ import { ProjectItem, StatusKey } from "./types";
 
 
 export default function Profile() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const {logout} = useContext(AuthContext);
   const { auth } = useAuth();
@@ -49,10 +45,7 @@ export default function Profile() {
     done: 46,
   };
 
-  const handleProjectPress = (projectId: string) => {
-    setSelectedProjectId(projectId);
-    console.log("Selected Project ID:", projectId);
-  };
+
 
   const handleStatusChange = (status: StatusKey) => {
     setSelectedStatus(status);
