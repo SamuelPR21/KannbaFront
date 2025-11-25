@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
@@ -15,10 +14,10 @@ export default function ProjectList({ refreshFlag }: { refreshFlag?: number }) {
 
   const handleIntoToProyect = (project: ProjectItem) => {
     if(project.role === "MANAGER"){
-      navigation.navigate("IntoToProyectManger");
-    }else if (project.role === "COLABORADOR"){
-      navigation.navigate("IntoToProyectColaborador");
-    }else{
+      (navigation as any).navigate("IntoToProyectManger", { project });
+    } else if (project.role === "COLABORADOR"){
+      (navigation as any).navigate("IntoToProyectColaborador", { project });
+    } else {
       alert("Rol de proyecto no reconocido.");
       return;
     }
@@ -53,14 +52,8 @@ export default function ProjectList({ refreshFlag }: { refreshFlag?: number }) {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const storedUser = await AsyncStorage.getItem("user");
-        if (!storedUser) return;
-
-        const user = JSON.parse(storedUser);
-        console.log('ProjectList fetching for user id ->', user.id);
-        const data = await getUserProjects(user.id);
-
-        if (data) setProjects(data);
+        const data = await getUserProjects();
+        setProjects(data ?? [])
       } catch (error) {
         console.log("❌ Error al obtener proyectos:", error);
       }

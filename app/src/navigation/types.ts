@@ -1,3 +1,5 @@
+import { ProjectItem } from "../components/profile/types";
+
 export type RootStackParamList = {
     Login: { registered?: boolean } | undefined;
     Register: undefined;
@@ -6,8 +8,8 @@ export type RootStackParamList = {
     ModalChange: undefined;
     HomeProyecto: undefined;
     HomeTablero: undefined;
-    IntoToProyectManger: undefined
-    IntoToProyectColaborador: undefined
+    IntoToProyectManger: { project: ProjectItem };
+    IntoToProyectColaborador: { project: ProjectItem };
     Profile: undefined
 
 }

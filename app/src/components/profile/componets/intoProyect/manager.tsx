@@ -1,6 +1,8 @@
+import { useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
 import { View } from "react-native";
 import CategoriaTabs, { Categoria } from "../../../home/components/Tablero/categoriasTabs";
+import { ProjectItem } from "../../types";
 import BottomBackProfile from "./UI/bottomBackProfile";
 import ListaIntegrantes from "./UI/listaIntegrantes";
 import ListaTareas from "./UI/listaTareas";
@@ -8,27 +10,30 @@ import BottomAñadirIntegrante from "./UI/manager/bottomAñadirIntegrante";
 import BottomAñadirTarea from "./UI/manager/bottomAñadirTarea";
 import Titulo from "./UI/titiulo";
 
-export default function Manager() {
-  const usuariosDisponibles = [
-    { id: "4", nombre: "Laura Torres" },
-    { id: "5", nombre: "Pedro Alvarez" },
-    { id: "6", nombre: "Ana Ramirez" },
-  ];
+
+export default function Manager({ refreshFlag }: { refreshFlag?: number }) {
+  const { params } = useRoute();
+  const { project } = params as { project: ProjectItem };
+
 
   const [selectedCategory, setSelectedCategory] = useState<Categoria>("To Do");
 
   return (
     <View className="flex-1 bg-blue-50 pt-16 px-4 pb-16">
-      <Titulo title="Título del proyecto" categoria="Categoría del proyecto" />
+      <Titulo 
+        title={project.proyectName}
+        categoria={project.categoryName}
+      />
 
       <View className="flex-row justify-between items-start">
         <ListaIntegrantes
           agregarIntegrante={(usuario) => console.log("Agregar:", usuario)}
         />
         <BottomAñadirIntegrante
-          usuarios={usuariosDisponibles}
-          agregarIntegrante={(usuario) => console.log("Agregar desde modal:", usuario)}
+            projectId={project.proyectId}
+            agregarIntegrante={(usuario) => console.log("Agregar desde modal:", usuario)}
         />
+
       </View>
 
       <BottomAñadirTarea />
