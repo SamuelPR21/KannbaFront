@@ -79,6 +79,7 @@ export default function CreateProjectModal({ visible, onClose, onCreate,}: Creat
             <Picker
               selectedValue={selectedCategory}
               onValueChange={(value) => setSelectedCategory(value)}
+              itemStyle={{ color: '#000000ff',fontSize: 16, height: 70 }}
             >
               <Picker.Item label="Seleccione una categoría..." value={-1} />
 
