@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Alert, FlatList, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { getUserIsNotProject } from "../../../../../../API/user_proyect";
+import { getRoles } from "../../../../../../API/roles";
+import { addUserToProject, getUserIsNotProject } from "../../../../../../API/user_proyect";
 
 type Usuario = {
   id: string;
@@ -11,34 +12,36 @@ type Usuario = {
 type Props = {
   projectId: number;
   agregarIntegrante: (usuario: Usuario) => void;
+  
 };
 
 export default function BottomAñadirIntegrante({ projectId, agregarIntegrante }: Props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [search, setSearch] = useState("");
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<Usuario | null>(null);
-  const [role, setRole] = useState<"MANAGER" | "COLABORADOR" | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const [usuariosAPI, setUsuariosAPI] = useState<Usuario[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
 
-
-    useEffect(() => {
+  useEffect(() => {
     if (!modalVisible) return;
 
-    const fetchUsuarios = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getUserIsNotProject(projectId);
-        if (Array.isArray(data)) {
-          setUsuariosAPI(data);
-        }
+        const usuarios = await getUserIsNotProject(projectId);
+        if (Array.isArray(usuarios)) setUsuariosAPI(usuarios);
+
+        const rolesAPI = await getRoles();
+        if (Array.isArray(rolesAPI)) setRoles(rolesAPI);
       } catch (error) {
-        console.log("❌ Error cargando usuarios:", error);
+        console.log("❌ Error cargando datos:", error);
       }
     };
 
-    fetchUsuarios();
+    fetchData();
   }, [modalVisible]);
 
-    const usuariosFiltrados = usuariosAPI.filter((u) =>
+  const usuariosFiltrados = usuariosAPI.filter((u) =>
     u.nameComlpete.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -52,7 +55,29 @@ export default function BottomAñadirIntegrante({ projectId, agregarIntegrante }
         { text: "Cancelar", style: "cancel" },
         {
           text: "Confirmar",
-          onPress: () => {
+          onPress: async () => {
+            // Buscar el rol real de la API
+            const rolSeleccionado = roles.find((r) => r.name === role);
+            const roleId = rolSeleccionado?.id;
+
+            if (!roleId) {
+              alert("Error: rol inválido.");
+              return;
+            }
+
+            // Llamar API real
+            const success = await addUserToProject(
+              projectId,
+              Number(usuarioSeleccionado.id),
+              Number(roleId)
+            );
+
+            if (!success) {
+              alert("❌ Error al agregar el usuario al proyecto.");
+              return;
+            }
+
+            // Actualizar UI
             agregarIntegrante(usuarioSeleccionado);
 
             setModalVisible(false);
@@ -60,14 +85,12 @@ export default function BottomAñadirIntegrante({ projectId, agregarIntegrante }
             setUsuarioSeleccionado(null);
             setRole(null);
 
-            alert(`${usuarioSeleccionado.nameComlpete} ahora es integrante del proyecto.`);
+            alert(`✔ ${usuarioSeleccionado.nameComlpete} ahora es integrante del proyecto.`);
           },
         },
       ]
     );
   };
-
-
 
   return (
     <View className="ml-2">
@@ -98,11 +121,11 @@ export default function BottomAñadirIntegrante({ projectId, agregarIntegrante }
               className="border border-blue-300 rounded px-3 py-2 mb-3 bg-blue-50"
             />
 
-            {/* Lista */}
+            {/* Lista de usuarios */}
             {!usuarioSeleccionado && (
               <FlatList
                 data={usuariosFiltrados}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                   <View className="flex-row justify-between items-center py-2 border-b border-blue-100">
                     <Text className="text-blue-800">{item.nameComlpete}</Text>
@@ -126,24 +149,18 @@ export default function BottomAñadirIntegrante({ projectId, agregarIntegrante }
                   Selecciona un rol para {usuarioSeleccionado.nameComlpete}:
                 </Text>
 
-                <View className="flex-row justify-around mb-4">
-                  <TouchableOpacity
-                    className={`px-4 py-2 rounded ${
-                      role === "MANAGER" ? "bg-blue-700" : "bg-blue-300"
-                    }`}
-                    onPress={() => setRole("MANAGER")}
-                  >
-                    <Text className="text-white font-bold">MANAGER</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    className={`px-4 py-2 rounded ${
-                      role === "COLABORADOR" ? "bg-blue-700" : "bg-blue-300"
-                    }`}
-                    onPress={() => setRole("COLABORADOR")}
-                  >
-                    <Text className="text-white font-bold">COLABORADOR</Text>
-                  </TouchableOpacity>
+                <View className="flex-row flex-wrap justify-around mb-4">
+                  {roles.map((r) => (
+                    <TouchableOpacity
+                      key={r.id}
+                      className={`px-4 py-2 rounded mb-2 ${
+                        role === r.name ? "bg-blue-700" : "bg-blue-300"
+                      }`}
+                      onPress={() => setRole(r.name)}
+                    >
+                      <Text className="text-white font-bold">{r.name}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
 
                 <TouchableOpacity

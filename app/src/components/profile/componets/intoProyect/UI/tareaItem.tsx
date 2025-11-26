@@ -1,14 +1,7 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useState } from "react";
-import {
-    FlatList,
-    LayoutAnimation,
-    Modal,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { FlatList, LayoutAnimation, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { listUsersInProject } from "../../../../../API/user_proyect";
 
 type Tarea = {
   id: string;
@@ -16,37 +9,55 @@ type Tarea = {
   descripcion: string;
   responsable: string;
   estado: "Back Log" | "To Do" | "Doing" | "Done";
+  userProyectId?: number;  
 };
+
 
 type Props = {
   tarea: Tarea;
   rol: "manager" | "colaborador";
+  proyectId: string | number; 
   onUpdate: (tarea: Tarea) => void;
   onDelete: (id: string) => void;
 };
 
-export default function TareaItem({ tarea, rol, onUpdate, onDelete }: Props) {
+export default function TareaItem({ tarea, rol, proyectId, onUpdate, onDelete }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [nombre, setNombre] = useState(tarea.nombre);
   const [descripcion, setDescripcion] = useState(tarea.descripcion);
   const [responsable, setResponsable] = useState(tarea.responsable);
   const [modalResponsable, setModalResponsable] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [usuarios, setUsuarios] = useState<{ id: number, name: string }[]>([]);
+  const [modalEstado, setModalEstado] = useState(false);
 
-  // Mock usuarios
-  const usuarios = [
-    "Samuel",
-    "Laura",
-    "Andrés",
-    "María",
-    "Jorge",
-    "Camila",
-    "Valentina",
-  ];
+  useEffect(() => {
+    if (rol === "manager") {
+     const fetchUsers = async () => {
+      try {
+        const data = await listUsersInProject(proyectId);
+
+        const users = (data ?? []).map((u: any) => ({
+          id: u.userProyectId,
+          name: u.userName 
+        }));
+
+
+        setUsuarios(users);
+
+      } catch (error) {
+        console.error("Error cargando usuarios del proyecto:", error);
+      }
+    };
+      fetchUsers();
+    }
+  }, [proyectId, rol]);
 
   const usuariosFiltrados = usuarios.filter((u) =>
-    u.toLowerCase().includes(busqueda.toLowerCase())
+  (u.name ?? "").toLowerCase().includes(busqueda.toLowerCase())
   );
+
+
 
   const handleSaveChange = (key: keyof Tarea, value: string) => {
     onUpdate({ ...tarea, [key]: value });
@@ -88,15 +99,14 @@ export default function TareaItem({ tarea, rol, onUpdate, onDelete }: Props) {
               </Text>
             )}
 
-            {/* Tag de estado */}
-            <View
-              className={`px-3 py-1 rounded-lg ${getEstadoColor(
-                tarea.estado
-              )}`}
-            >
-              <Text className="text-white font-semibold text-xs">
-                {tarea.estado}
-              </Text>
+            <View className={`px-3 py-1 rounded-lg ${getEstadoColor(tarea.estado)}`}>
+              {rol === "manager" ? (
+                <TouchableOpacity onPress={() => setModalEstado(true)}>
+                  <Text className="text-white font-semibold text-xs">{tarea.estado}</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text className="text-white font-semibold text-xs">{tarea.estado}</Text>
+              )}
             </View>
           </View>
 
@@ -115,7 +125,6 @@ export default function TareaItem({ tarea, rol, onUpdate, onDelete }: Props) {
           </View>
         </View>
 
-        {/* Botón eliminar */}
         {rol === "manager" && (
           <TouchableOpacity
             onPress={() => onDelete(tarea.id)}
@@ -126,7 +135,7 @@ export default function TareaItem({ tarea, rol, onUpdate, onDelete }: Props) {
         )}
       </View>
 
-      {/* Botón de descripción */}
+      {/* Botón descripción */}
       <TouchableOpacity
         onPress={() => {
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -139,7 +148,6 @@ export default function TareaItem({ tarea, rol, onUpdate, onDelete }: Props) {
         </Text>
       </TouchableOpacity>
 
-      {/* Descripción expandida */}
       {expanded && (
         <View className="mt-2">
           {rol === "manager" ? (
@@ -147,7 +155,7 @@ export default function TareaItem({ tarea, rol, onUpdate, onDelete }: Props) {
               multiline
               value={descripcion}
               onChangeText={(text) => {
-                setDescripcion(text);
+                setDescripcion(text); 
                 handleSaveChange("descripcion", text);
               }}
               className="border border-blue-300 bg-blue-50 rounded p-2 text-blue-900"
@@ -158,7 +166,7 @@ export default function TareaItem({ tarea, rol, onUpdate, onDelete }: Props) {
         </View>
       )}
 
-      {/* Modal cambiar responsable */}
+      {/* Modal responsables */}
       <Modal visible={modalResponsable} animationType="slide" transparent>
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white w-11/12 rounded-2xl p-4">
@@ -175,18 +183,20 @@ export default function TareaItem({ tarea, rol, onUpdate, onDelete }: Props) {
 
             <FlatList
               data={usuariosFiltrados}
-              keyExtractor={(item) => item}
+              keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   onPress={() => {
-                    setResponsable(item);
-                    handleSaveChange("responsable", item);
+                    setResponsable(item.name);
+
+                    onUpdate({ ...tarea, responsable: item.name, userProyectId: item.id });
+
                     setModalResponsable(false);
                     setBusqueda("");
                   }}
                   className="p-2 border-b border-blue-100"
                 >
-                  <Text className="text-blue-700">{item}</Text>
+                  <Text className="text-blue-700">{item.name}</Text>
                 </TouchableOpacity>
               )}
               style={{ maxHeight: 200 }}
@@ -194,6 +204,43 @@ export default function TareaItem({ tarea, rol, onUpdate, onDelete }: Props) {
 
             <TouchableOpacity
               onPress={() => setModalResponsable(false)}
+              className="mt-4 bg-red-500 py-2 rounded-lg"
+            >
+              <Text className="text-white font-bold text-center">Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal estado */}
+      <Modal visible={modalEstado} animationType="slide" transparent>
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white w-11/12 rounded-2xl p-4">
+            <Text className="text-xl font-bold text-blue-900 mb-2 text-center">
+              Cambiar Estado
+            </Text>
+
+            {["Back Log", "To Do", "Doing", "Done"].map((estado) => (
+              <TouchableOpacity
+                key={estado}
+                onPress={() => {
+                  handleSaveChange("estado", estado as Tarea["estado"]);
+                  setModalEstado(false);
+                }}
+                className="p-2 border-b border-blue-100"
+              >
+                <Text
+                  className={`text-center font-semibold ${
+                    estado === tarea.estado ? "text-blue-800" : "text-blue-500"
+                  }`}
+                >
+                  {estado}
+                </Text>
+              </TouchableOpacity>
+            ))}
+
+            <TouchableOpacity
+              onPress={() => setModalEstado(false)}
               className="mt-4 bg-red-500 py-2 rounded-lg"
             >
               <Text className="text-white font-bold text-center">Cerrar</Text>

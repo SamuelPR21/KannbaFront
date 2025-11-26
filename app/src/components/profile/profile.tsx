@@ -1,10 +1,9 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import { AuthContext } from "../../context/userContext";
 import useAuth from "../../hook/useAuth";
 import LogoutBtn from "./componets/logoutbtn";
 import ProgressBar from "./componets/progressbar";
-import ProgressStatusSelector from "./componets/progressStatusSelector";
 import AddProjectButton from "./componets/Projects/addProjectButton";
 import CreateProjectModal from "./componets/Projects/createProjectModalProps";
 import ProjectList from "./componets/Projects/projectList";
@@ -13,22 +12,16 @@ import CreateTaskPersonalbtn from "./componets/taskPersonal/createTaskPersonalbt
 import ModalTaskPersonal from "./componets/taskPersonal/modalTaskPersonal";
 import PersonalProjectList from "./componets/taskPersonal/personalProjectList";
 import UserInfo from "./componets/userInfo";
-import { ProjectItem, StatusKey } from "./types";
-
+import { ProjectItem } from "./types";
 
 export default function Profile() {
 
   const {logout} = useContext(AuthContext);
   const { auth } = useAuth();
-  // Para depuración: ver estructura del payload del JWT
-  console.log('Auth context in Profile ->', auth);
   
-  const [selectedStatus, setSelectedStatus] = React.useState<StatusKey>("backlog");
-  const [selectedList, setSelectedList] = React.useState<"projects" | "personal">("projects");
-  const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
-  const [showCreateModal, setShowCreateModal] = React.useState(false);
-  const [projectsRefresh, setProjectsRefresh] = React.useState(0);
-
+  const [selectedList, setSelectedList] = useState<"projects" | "personal">("projects");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [projectsRefresh, setProjectsRefresh] = useState(0);
   const [selectedTask, setSelectedTask] = useState<ProjectItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   
@@ -36,20 +29,6 @@ export default function Profile() {
     setSelectedTask(tarea);
     setModalVisible(true);
   };
-  
-
-  const progressByStatus: Record<StatusKey, number> = {
-    backlog: 18,
-    todo: 34,
-    doing: 62,
-    done: 46,
-  };
-
-
-
-  const handleStatusChange = (status: StatusKey) => {
-    setSelectedStatus(status);
-  }
 
   const handleListChange = (list: "projects" | "personal") => {
     setSelectedList(list)
@@ -62,21 +41,9 @@ export default function Profile() {
   const handleCreateProject = (projectName: string, category: string) => {
     console.log("Nuevo proyecto creado:", projectName, "Categoría:", category);
     setShowCreateModal(false);
-    // Incrementar flag para forzar recarga de la lista de proyectos
     setProjectsRefresh((v) => v + 1);
-    // Aquí puedes enviar los datos a tu API
   };
   
-    const updateTask = (updatedTask: ProjectItem) => {
-    console.log("Task updated:", updatedTask);
-    // Add logic to update the task in your state or backend
-  }
-
-  const deleteTask = (taskId: string) => {
-    console.log("Task deleted:", taskId);
-    // Add logic to delete the task from your state or backend
-  }
-
   let today = new Date();
   let birthDate = new Date(auth?.user?.dateOfBirth);
   let age = today.getFullYear() - birthDate.getFullYear();
@@ -97,11 +64,7 @@ export default function Profile() {
         age={age}
       />
 
-      <ProgressStatusSelector
-        selected={selectedStatus}
-        onSelect={handleStatusChange}
-      />
-      <ProgressBar progress={progressByStatus[selectedStatus]} />
+      <ProgressBar/>
 
       <ProjectSwitchButtons
         selected={selectedList}
@@ -120,8 +83,6 @@ export default function Profile() {
               visible={modalVisible}
               tarea={selectedTask}
               onClose={() => setModalVisible(false)}
-              onUpdate={updateTask}
-              onDelete={deleteTask}
             />
           </>
         )}

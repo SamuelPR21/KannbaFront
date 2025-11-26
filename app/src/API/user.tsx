@@ -38,7 +38,7 @@ export const login = async (email: string, password: string): Promise<string | n
         return token;
     } catch (error) {
         console.log("Error en login", error);
-        throw error;
+            throw error;
     }
 }
 
@@ -59,6 +59,31 @@ export const register = async (payload: RegisterPayload): Promise<any | null> =>
         return response.data;
     } catch (error) {
         console.log("Error en register", error);
+        return null;
+    }
+}
+
+
+export interface UserProgress {
+  state: string;
+  totalTasks: number;
+  matchingTasks: number;
+  progressPercentage: number;
+}
+
+export const getProgressByState = async (state: string): Promise<UserProgress | null> => {
+    try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+            console.log("❌ No hay token, devolviendo null");
+            return null;
+        }
+        const response = await axios.get(`${USER}/progress?state=${state}`, {
+            headers: { 'Authorization': `${token}` }
+        });
+        return response.data;
+    } catch (error: any) {
+        console.log("❌ Error al obtener progreso por estado:", error.response?.data || error.message);
         return null;
     }
 }
