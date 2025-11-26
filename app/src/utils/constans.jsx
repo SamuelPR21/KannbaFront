@@ -9,4 +9,4 @@ export const ROLES = `${BASE_URL}/roles`;
 export const TASKS_PROJECT = `${BASE_URL}/proyects`;
 export const TASK_HISTORY = `${BASE_URL}/task-history`;
 export const STATE = `${BASE_URL}/state`;
-export const PET = `${BASE_URL}/pets`;
+export const PET = `${BASE_URL}/pet`;

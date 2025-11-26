@@ -36,7 +36,10 @@ export const alimentar = async () : Promise<boolean> => {
         return true;
     }
     catch (error: any) {
-        console.log("❌ Error al alimentar la mascota:", error.response?.data || error.message);
-        return false;
+        const server = error.response?.data;
+        const msg = server?.message || server || error.message || "Error desconocido";
+        console.log("❌ Error al alimentar la mascota:", msg);
+        // Propagar el error para que el caller pueda mostrar la alerta
+        throw new Error(msg);
     }
 }
