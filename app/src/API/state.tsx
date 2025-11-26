@@ -1,4 +1,3 @@
-// src/API/state.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { STATE } from "../utils/constans";

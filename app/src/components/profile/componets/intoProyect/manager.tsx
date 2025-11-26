@@ -1,3 +1,4 @@
+import { listUsersInProject } from "@/app/src/API/user_proyect";
 import { useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
 import { View } from "react-native";
@@ -9,13 +10,13 @@ import ListaTareas from "./UI/listaTareas";
 import BottomAñadirIntegrante from "./UI/manager/bottomAñadirIntegrante";
 import BottomAñadirTarea from "./UI/manager/bottomAñadirTarea";
 import Titulo from "./UI/titiulo";
+type Usuario = any;
 
 
 export default function Manager({ refreshFlag }: { refreshFlag?: number }) {
   const { params } = useRoute();
   const { project } = params as { project: ProjectItem };
-
-
+  const [integrantes, setIntegrantes] = useState<Usuario[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Categoria>("To Do");
 
   return (
@@ -27,16 +28,27 @@ export default function Manager({ refreshFlag }: { refreshFlag?: number }) {
 
       <View className="flex-row justify-between items-start">
         <ListaIntegrantes
-          agregarIntegrante={(usuario) => console.log("Agregar:", usuario)}
-        />
-        <BottomAñadirIntegrante
-            projectId={project.proyectId}
-            agregarIntegrante={(usuario) => console.log("Agregar desde modal:", usuario)}
+          {...({ projectId: project.proyectId, integrantes, setIntegrantes, rolUsuarioActual: "MANAGER" } as any)}
         />
 
+        <BottomAñadirIntegrante 
+          projectId={project.proyectId} 
+            agregarIntegrante={() => {
+              listUsersInProject(project.proyectId).then(users => {
+                setIntegrantes(
+                  (users ?? []).map(user => ({
+                    id: String(user.userProyectId),
+                    userId: String(user.userId),
+                    nombre: user.userName,
+                    rol: user.role === "MANAGER" ? "1" : user.role === "COLABORADOR" ? "2" : null
+                  }))
+                );
+              });
+            }}
+        />
       </View>
 
-      <BottomAñadirTarea />
+      <BottomAñadirTarea proyectId={String(project.proyectId)} />
 
       <CategoriaTabs
         categorias={["Back Log", "To Do", "Doing", "Done"]}
@@ -44,7 +56,11 @@ export default function Manager({ refreshFlag }: { refreshFlag?: number }) {
         onSelect={setSelectedCategory}
       />
 
-      <ListaTareas rol="manager" filtroCategoria={selectedCategory} />
+      <ListaTareas 
+        rol="manager" 
+        filtroCategoria={selectedCategory}
+        proyectId={project.proyectId} 
+      />
       <BottomBackProfile />
     </View>
   );

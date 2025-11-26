@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { createTaskInProject } from "../../../../../../API/task_proyect";
+import { listUsersInProject } from "../../../../../../API/user_proyect";
 
-export default function BottomAñadirTarea() {
+
+export default function BottomAñadirTarea({ proyectId }: { proyectId: string }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [nombreTarea, setNombreTarea] = useState("");
@@ -9,28 +12,29 @@ export default function BottomAñadirTarea() {
 
   const [responsable, setResponsable] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState("");
-  const [usuarios] = useState([
-    "Usuario 1",
-    "Usuario 2",
-    "Usuario 3",
-    "Usuario 4",
-    "Usuario 5",
-    "Usuario 6",
-    "Usuario 7",
-    "Usuario 8",
-    "Usuario 9",
-  ]);
+  const [usuarios, setUsuarios] = useState<any[]>([]);
 
-  // Filtrado de usuarios
-  const usuariosFiltrados = usuarios.filter((user) =>
-    user.toLowerCase().includes(busqueda.toLowerCase())
+  const [estado, setEstado] = useState<number | null>(null);
+  const estados = [
+    { label: "Back Log", id: 1 },
+    { label: "To Do", id: 2 },
+    { label: "Doing", id: 3 },
+    { label: "Done", id: 4 },
+  ];
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const data = await listUsersInProject(proyectId);
+      if (data) setUsuarios(data);
+    };
+
+    fetchUsers();
+  }, []);
+
+  const usuariosFiltrados = usuarios.filter((u) =>
+    u.userName.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  // Estado de tarea
-  const [estado, setEstado] = useState<string | null>(null);
-  const estados = ["Back Log", "To Do", "Doing", "Done"];
-
-  // Reiniciar campos
   const resetCampos = () => {
     setNombreTarea("");
     setDescripcion("");
@@ -39,36 +43,40 @@ export default function BottomAñadirTarea() {
     setEstado(null);
   };
 
-  // Validar y crear tarea
-  const handleCrearTarea = () => {
-    if (!nombreTarea.trim() || !descripcion.trim() || !responsable || !estado) {
-      Alert.alert("Error", "Por favor completa todos los campos.");
+  const handleCrearTarea = async () => {
+    if (!nombreTarea || !descripcion || !responsable || !estado) {
+      Alert.alert("Error", "Completa todos los campos");
       return;
     }
 
-    console.log({
+    const success = await createTaskInProject(
+      proyectId,
       nombreTarea,
       descripcion,
       responsable,
-      estado,
-    });
+      estado 
+    );
 
-    Alert.alert("Tarea creada", `La tarea "${nombreTarea}" fue creada exitosamente.`);
-    setModalVisible(false);
-    resetCampos();
+    if (success) {
+      Alert.alert("Éxito", "Tarea creada");
+      setModalVisible(false);
+      resetCampos();
+    } else {
+      Alert.alert("Error", "No se pudo crear la tarea");
+    }
   };
 
   return (
     <View className="ml-2">
-      {/* Botón para abrir modal */}
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
         className="bg-blue-800 px-5 py-3 rounded-lg shadow-md"
       >
-        <Text className="text-white font-bold text-center text-lg">Añadir Tarea</Text>
+        <Text className="text-white font-bold text-center text-lg">
+          Añadir Tarea
+        </Text>
       </TouchableOpacity>
 
-      {/* Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -91,9 +99,11 @@ export default function BottomAñadirTarea() {
               showsVerticalScrollIndicator={true}
               keyboardShouldPersistTaps="handled"
             >
-              {/* Campo Nombre */}
+              {/* Nombre */}
               <View className="flex-row items-center mb-3">
-                <Text className="text-blue-800 font-semibold w-1/3">Nombre:</Text>
+                <Text className="text-blue-800 font-semibold w-1/3">
+                  Nombre:
+                </Text>
                 <TextInput
                   placeholder="Nombre de la tarea"
                   placeholderTextColor="#6b7280"
@@ -103,9 +113,11 @@ export default function BottomAñadirTarea() {
                 />
               </View>
 
-              {/* Campo Descripción */}
+              {/* Descripción */}
               <View className="flex-row items-center mb-3">
-                <Text className="text-blue-800 font-semibold w-1/3">Descripción:</Text>
+                <Text className="text-blue-800 font-semibold w-1/3">
+                  Descripción:
+                </Text>
                 <TextInput
                   placeholder="Breve descripción"
                   placeholderTextColor="#6b7280"
@@ -116,79 +128,110 @@ export default function BottomAñadirTarea() {
                 />
               </View>
 
-              {/* Buscar Responsable */}
-              <View className="mb-3">
-                <Text className="text-blue-800 font-semibold mb-2">Responsable:</Text>
-                <TextInput
-                  placeholder="Buscar nombre de usuario"
-                  placeholderTextColor="#6b7280"
-                  value={busqueda}
-                  onChangeText={setBusqueda}
-                  className="border border-blue-300 rounded px-3 py-2 bg-blue-50"
-                />
+              {/* Responsable */}
+              <View className="mb-4">
+                <Text className="text-blue-800 font-semibold mb-2">Responsable</Text>
 
-                {/* Lista filtrada */}
+                {/* Campo de búsqueda más grande y claro */}
+                <View className="flex-row items-center border border-blue-300 rounded-lg bg-white p-2">
+                  <TextInput
+                    placeholder="Buscar usuario por nombre..."
+                    placeholderTextColor="#9CA3AF"
+                    value={busqueda}
+                    onChangeText={setBusqueda}
+                    className="flex-1 px-2 py-3 text-base"
+                  />
+                </View>
+
+                {/* Lista de resultados: tarjetas grandes y táctiles */}
                 {busqueda.length > 0 && (
-                  <View className="border border-blue-200 bg-blue-50 rounded mt-2 max-h-40">
+                  <View className="mt-3 max-h-52">
                     <ScrollView>
                       {usuariosFiltrados.length > 0 ? (
-                        usuariosFiltrados.map((user, index) => (
+                        usuariosFiltrados.map((user) => (
                           <TouchableOpacity
-                            key={index}
+                            key={user.userProyectId}
                             onPress={() => {
-                              setResponsable(user);
+                              setResponsable(user.userProyectId);
                               setBusqueda("");
                             }}
-                            className="flex-row justify-between items-center px-3 py-2 border-b border-blue-100"
+                            className="flex-row items-center justify-between bg-blue-50 border border-blue-100 rounded-lg p-3 mb-2 mx-1"
                           >
-                            <Text className="text-blue-800">{user}</Text>
-                            <Text className="text-blue-600 font-semibold">Añadir</Text>
+                            <View className="flex-row items-center">
+                              <View className="w-10 h-10 rounded-full bg-blue-200 items-center justify-center mr-3">
+                                <Text className="text-blue-700 font-bold">
+                                  {String(user.userName || "").slice(0,2).toUpperCase()}
+                                </Text>
+                              </View>
+                              <View>
+                                <Text className="text-blue-800 font-semibold">{user.userName}</Text>
+                                {user.role && <Text className="text-xs text-gray-500">{user.role}</Text>}
+                              </View>
+                            </View>
+
+                            <View>
+                              <Text className="text-blue-600 font-semibold">Seleccionar</Text>
+                            </View>
                           </TouchableOpacity>
                         ))
                       ) : (
-                        <Text className="text-center text-gray-500 py-2">
-                          No se encontraron usuarios
-                        </Text>
+                        <View className="p-3">
+                          <Text className="text-center text-gray-500 py-2">No se encontraron usuarios</Text>
+                        </View>
                       )}
                     </ScrollView>
                   </View>
                 )}
 
-                {/* Usuario seleccionado */}
+                {/* Visual del responsable seleccionado: card resaltada */}
                 {responsable && (
-                  <Text className="mt-2 text-green-700 font-semibold">
-                    Responsable: {responsable}
-                  </Text>
+                  <View className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3 flex-row items-center">
+                    <View className="w-10 h-10 rounded-full bg-green-200 items-center justify-center mr-3">
+                      <Text className="text-green-800 font-bold">
+                        {String(usuarios.find((u) => u.userProyectId === responsable)?.userName || "").slice(0,2).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-green-800 font-semibold">
+                        {usuarios.find((u) => u.userProyectId === responsable)?.userName}
+                      </Text>
+                      <Text className="text-sm text-gray-500">Responsable asignado</Text>
+                    </View>
+                  </View>
                 )}
               </View>
 
-              {/* Estado con botones */}
+              {/* Estado */}
               <View className="mt-3">
-                <Text className="text-blue-800 font-semibold mb-2">Estado:</Text>
+                <Text className="text-blue-800 font-semibold mb-2">
+                  Estado:
+                </Text>
                 <View className="flex-row flex-wrap justify-between">
                   {estados.map((item) => (
                     <TouchableOpacity
-                      key={item}
-                      onPress={() => setEstado(item)}
+                      key={item.id}
+                      onPress={() => setEstado(item.id)}
                       className={`px-4 py-2 rounded-lg mb-2 ${
-                        estado === item
+                        estado === item.id
                           ? "bg-blue-700"
                           : "bg-blue-100 border border-blue-400"
                       }`}
                     >
                       <Text
                         className={`font-semibold ${
-                          estado === item ? "text-white" : "text-blue-800"
+                          estado === item.id
+                            ? "text-white"
+                            : "text-blue-800"
                         }`}
                       >
-                        {item}
+                        {item.label}
                       </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               </View>
 
-              {/* Botones de acción */}
+              {/* Botones */}
               <View className="flex-row justify-between mt-6">
                 <TouchableOpacity
                   onPress={() => {

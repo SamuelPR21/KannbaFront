@@ -8,14 +8,10 @@ export default function ModalTaskPersonal({
   visible,
   tarea,
   onClose,
-  onUpdate,
-  onDelete,
 }: {
   visible: boolean;
   tarea: any;
   onClose: () => void;
-  onUpdate: (t: any) => void;
-  onDelete: (id: string) => void;
 }) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -52,7 +48,6 @@ export default function ModalTaskPersonal({
       estado,
     };
 
-    onUpdate(datosActualizados);
 
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setEdited(true);
@@ -169,7 +164,6 @@ export default function ModalTaskPersonal({
                   text: "Eliminar",
                   style: "destructive",
                   onPress: () => {
-                    onDelete(tarea.id);
                     onClose();
                   },
                 },
