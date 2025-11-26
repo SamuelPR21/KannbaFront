@@ -46,7 +46,7 @@ export default function ModalTaskPersonal({
 
   const handleSave = () => {
     const datosActualizados = {
-      ...tarea,
+      ...(tarea ?? {}),
       nombre,
       descripcion,
       estado,
@@ -161,13 +161,15 @@ export default function ModalTaskPersonal({
             </View>
           )}
 
-          <TouchableOpacity
-            onPress={() => onDelete(String(tarea.id))}
-            className="mt-6 flex-row justify-center items-center"
-          >
-            <Feather name="trash-2" size={20} color="red" />
-            <Text className="text-red-600 font-bold ml-2">Eliminar tarea</Text>
-          </TouchableOpacity>
+          {tarea?.id && (
+            <TouchableOpacity
+              onPress={() => onDelete(String(tarea.id))}
+              className="mt-6 flex-row justify-center items-center"
+            >
+              <Feather name="trash-2" size={20} color="red" />
+              <Text className="text-red-600 font-bold ml-2">Eliminar tarea</Text>
+            </TouchableOpacity>
+          )}
 
           {/* CERRAR MODAL */}
           <TouchableOpacity onPress={handleClose} className="mt-5">
