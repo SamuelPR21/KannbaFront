@@ -8,10 +8,14 @@ export default function ModalTaskPersonal({
   visible,
   tarea,
   onClose,
+  onUpdate,
+  onDelete,
 }: {
   visible: boolean;
   tarea: any;
   onClose: () => void;
+  onUpdate: (updatedTask: any) => void;
+  onDelete: (taskId: string) => void;
 }) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -48,13 +52,14 @@ export default function ModalTaskPersonal({
       estado,
     };
 
+    onUpdate(datosActualizados);
 
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setEdited(true);
 
     setTimeout(() => {
       setEdited(false);
-      onClose(); 
+      onClose();
     }, 1200);
   };
 
@@ -157,18 +162,7 @@ export default function ModalTaskPersonal({
           )}
 
           <TouchableOpacity
-            onPress={() =>
-              Alert.alert("Eliminar tarea", "¿Seguro que deseas eliminarla?", [
-                { text: "Cancelar", style: "cancel" },
-                {
-                  text: "Eliminar",
-                  style: "destructive",
-                  onPress: () => {
-                    onClose();
-                  },
-                },
-              ])
-            }
+            onPress={() => onDelete(String(tarea.id))}
             className="mt-6 flex-row justify-center items-center"
           >
             <Feather name="trash-2" size={20} color="red" />
