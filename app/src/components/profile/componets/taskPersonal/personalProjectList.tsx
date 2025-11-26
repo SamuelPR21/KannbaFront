@@ -1,5 +1,6 @@
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { getTaskes } from "../../../../API/task_personal";
 import { TaskPersonal } from "../../types";
 
 export default function PersonalProjectList({
