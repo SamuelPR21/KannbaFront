@@ -39,6 +39,13 @@ export default function LoginScreen() {
         "Por favor, complete ambos campos (Email y Contraseña)."
       );
     }
+
+    if(!formData.email.includes("@")){
+      return Alert.alert("Error de Validación", 
+      "Por favor, ingrese un correo electrónico válido."
+    );
+    }
+
     try{
       await login({
         email: formData.email,
