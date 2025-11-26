@@ -1,42 +1,44 @@
-import { useState } from "react";
+// src/components/home/components/organizarSelector.tsx
+import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
-  organizarPor: string;
+  organizarPor: "Personal" | "Proyecto";
   opciones: string[];
   onSelect: (value: string) => void;
 }
 
-export default function OrganizarSelector({ organizarPor, opciones, onSelect }: Props) {
-  const [mostrar, setMostrar] = useState(false);
-
+export default function OrganizarSelector({
+  organizarPor,
+  opciones,
+  onSelect,
+}: Props) {
   return (
-    <View>
-      <Text className="font-semibold mb-1 text-blue-800">Organizar por:</Text>
-      <TouchableOpacity
-        onPress={() => setMostrar(!mostrar)}
-        className="border border-blue-500 rounded p-2 mb-2 flex-row justify-between bg-blue-100"
-      >
-        <Text className="text-blue-700">{organizarPor}</Text>
-        <Text className="text-blue-700">▼</Text>
-      </TouchableOpacity>
+    <View className="mt-4">
+      <Text className="text-xs text-slate-500 mb-1">Vista</Text>
 
-      {mostrar && (
-        <View className="border border-blue-300 rounded mb-3 bg-blue-100">
-          {opciones.map((item) => (
+      <View className="flex-row bg-white rounded-full border border-blue-200 overflow-hidden shadow-sm">
+        {opciones.map((opt) => {
+          const isActive = opt === organizarPor;
+          return (
             <TouchableOpacity
-              key={item}
-              onPress={() => {
-                onSelect(item);
-                setMostrar(false);
-              }}
-              className={`p-2 ${organizarPor === item ? "bg-blue-300" : "bg-blue-50"}`}
+              key={opt}
+              className={`flex-1 py-2 items-center ${
+                isActive ? "bg-blue-700" : "bg-transparent"
+              }`}
+              onPress={() => onSelect(opt)}
             >
-              <Text className="text-blue-800">{item}</Text>
+              <Text
+                className={`text-sm font-semibold ${
+                  isActive ? "text-white" : "text-blue-700"
+                }`}
+              >
+                {opt}
+              </Text>
             </TouchableOpacity>
-          ))}
-        </View>
-      )}
+          );
+        })}
+      </View>
     </View>
   );
 }
