@@ -28,7 +28,7 @@ export default function Manager({ refreshFlag }: { refreshFlag?: number }) {
 
       <View className="flex-row justify-between items-start">
         <ListaIntegrantes
-          {...({ projectId: project.proyectId, integrantes, setIntegrantes } as any)}
+          {...({ projectId: project.proyectId, integrantes, setIntegrantes, rolUsuarioActual: "MANAGER" } as any)}
         />
 
         <BottomAñadirIntegrante 
