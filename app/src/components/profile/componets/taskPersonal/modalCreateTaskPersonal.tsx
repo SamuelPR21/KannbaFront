@@ -1,10 +1,20 @@
 import React from "react";
-import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView,  Modal,  Platform,  ScrollView,  Text,  TextInput,  TouchableOpacity,  View, } from "react-native";
 
-export default function ModalCreateTaskPersonal({modalVisible, setModalVisible}: {modalVisible: boolean, setModalVisible: (value: boolean) => void}) {
-    const [nombreTarea, setNombreTarea] = React.useState("");
-    const [descripcion, setDescripcion] = React.useState("");
-    const [estado, setEstado] = React.useState<string | null>(null);
+export default function ModalCreateTaskPersonal({
+  modalVisible,
+  setModalVisible,
+  onCreate,
+}: {
+  modalVisible: boolean;
+  setModalVisible: (value: boolean) => void;
+  onCreate?: (
+    payload: { nombre: string; descripcion?: string; estado: string }
+  ) => Promise<void> | void;
+}) {
+  const [nombreTarea, setNombreTarea] = React.useState("");
+  const [descripcion, setDescripcion] = React.useState("");
+  const [estado, setEstado] = React.useState<string | null>(null);
 
   function resetCampos() {
     setNombreTarea("");
@@ -14,74 +24,84 @@ export default function ModalCreateTaskPersonal({modalVisible, setModalVisible}:
 
   const estados = ["Back Log", "To Do", "Doing", "Done"];
 
+  const handleCrearTarea = async () => {
+    if (!nombreTarea.trim() || !descripcion.trim() || !estado) {
+      Alert.alert("Error", "Por favor completa todos los campos.");
+      return;
+    }
 
-
-    const handleCrearTarea = () => {
-        if (!nombreTarea.trim() || !descripcion.trim() || !estado) {
-          Alert.alert("Error", "Por favor completa todos los campos.");
-          return;
-        }
-    
+    try {
+      if (onCreate) {
+        await onCreate({
+          nombre: nombreTarea.trim(),
+          descripcion: descripcion.trim(),
+          estado,
+        });
+      } else {
         console.log({
           nombreTarea,
           descripcion,
           estado,
         });
-    
-        Alert.alert("Tarea creada", `La tarea "${nombreTarea}" fue creada exitosamente.`);
-        setModalVisible(false);
-        resetCampos();
-      };
+      }
+      Alert.alert("Tarea creada", `La tarea "${nombreTarea}" fue creada exitosamente.`);
+      setModalVisible(false);
+      resetCampos();
+    } catch (err) {
+      console.error("Error creando tarea:", err);
+      Alert.alert("Error", "No se pudo crear la tarea.");
+    }
+  };
 
   return (
     <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-          resetCampos();
-        }}
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={() => {
+        setModalVisible(false);
+        resetCampos();
+      }}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        className="flex-1 justify-center items-center bg-black/60"
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          className="flex-1 justify-center items-center bg-black/60"
-        >
-          <View className="bg-white w-11/12 p-5 rounded-2xl shadow-lg max-h-[90%]">
-            <Text className="text-2xl font-bold text-blue-900 mb-5 text-center">
-              Añadir Tarea
-            </Text>
+        <View className="bg-white w-11/12 p-5 rounded-2xl shadow-lg max-h-[90%]">
+          <Text className="text-2xl font-bold text-blue-900 mb-5 text-center">
+            Añadir Tarea
+          </Text>
 
-            <ScrollView
-              showsVerticalScrollIndicator={true}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View className="flex-row items-center mb-3">
-                <Text className="text-blue-800 font-semibold w-1/3">Nombre:</Text>
-                <TextInput
-                  placeholder="Nombre de la tarea"
-                  placeholderTextColor="#6b7280"
-                  value={nombreTarea}
-                  onChangeText={setNombreTarea}
-                  className="border border-blue-300 rounded px-3 py-2 bg-blue-50 flex-1"
-                />
-              </View>
+          <ScrollView
+            showsVerticalScrollIndicator={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View className="flex-row items-center mb-3">
+              <Text className="text-blue-800 font-semibold w-1/3">Nombre:</Text>
+              <TextInput
+                placeholder="Nombre de la tarea"
+                placeholderTextColor="#6b7280"
+                value={nombreTarea}
+                onChangeText={setNombreTarea}
+                className="border border-blue-300 rounded px-3 py-2 bg-blue-50 flex-1"
+              />
+            </View>
 
-              {/* Campo Descripción */}
-              <View className="flex-row items-center mb-3">
-                <Text className="text-blue-800 font-semibold w-1/3">Descripción:</Text>
-                <TextInput
-                  placeholder="Breve descripción"
-                  placeholderTextColor="#6b7280"
-                  value={descripcion}
-                  onChangeText={setDescripcion}
-                  multiline
-                  className="border border-blue-300 rounded px-3 py-2 bg-blue-50 flex-1 min-h-[60px]"
-                />
-              </View>
+            {/* Campo Descripción */}
+            <View className="flex-row items-center mb-3">
+              <Text className="text-blue-800 font-semibold w-1/3">Descripción:</Text>
+              <TextInput
+                placeholder="Breve descripción"
+                placeholderTextColor="#6b7280"
+                value={descripcion}
+                onChangeText={setDescripcion}
+                multiline
+                className="border border-blue-300 rounded px-3 py-2 bg-blue-50 flex-1 min-h-[60px]"
+              />
+            </View>
 
-              {/* Estado con botones */}
-              <View className="mt-3">
+            {/* Estado con botones */}
+            <View className="mt-3">
               <Text className="text-blue-800 font-semibold mb-2">Estado:</Text>
               <View className="flex-row flex-wrap justify-between">
                 {estados.map((item) => (
@@ -106,29 +126,28 @@ export default function ModalCreateTaskPersonal({modalVisible, setModalVisible}:
               </View>
             </View>
 
-              {/* Botones de acción */}
-              <View className="flex-row justify-between mt-6">
-                <TouchableOpacity
-                  onPress={() => {
-                    setModalVisible(false);
-                    resetCampos();
-                  }}
-                  className="bg-red-600 px-5 py-2 rounded-lg"
-                >
-                  <Text className="text-white font-bold">Cancelar</Text>
-                </TouchableOpacity>
+            {/* Botones de acción */}
+            <View className="flex-row justify-between mt-6">
+              <TouchableOpacity
+                onPress={() => {
+                  setModalVisible(false);
+                  resetCampos();
+                }}
+                className="bg-red-600 px-5 py-2 rounded-lg"
+              >
+                <Text className="text-white font-bold">Cancelar</Text>
+              </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={handleCrearTarea}
-                  className="bg-blue-700 px-5 py-2 rounded-lg"
-                >
-                  <Text className="text-white font-bold">Guardar</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
+              <TouchableOpacity
+                onPress={handleCrearTarea}
+                className="bg-blue-700 px-5 py-2 rounded-lg"
+              >
+                <Text className="text-white font-bold">Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
-
   );
 }
