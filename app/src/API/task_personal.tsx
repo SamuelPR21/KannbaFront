@@ -21,6 +21,62 @@ export const getTaskes = async (): Promise<any[] | null> => {
   }
 };
 
+// DETALLE
+export const getPersonalTaskById = async (
+  taskId: number
+): Promise<any | null> => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      console.log("❌ No hay token, devolviendo null");
+      return null;
+    }
+
+    const response = await axios.get(`${TASKS_PERSONAL}/${taskId}`, {
+      headers: { Authorization: `${token}` },
+    });
+
+    console.log("📌 Detalle tarea personal:", response.data);
+    return response.data.task;
+  } catch (error: any) {
+    console.log(
+      `❌ Error al obtener detalle de tarea personal ${taskId}:`,
+      error.response?.data || error.message
+    );
+    return null;
+  }
+};
+
+
+export const updatePersonalTask = async (
+  taskId: number,
+  payload: { name?: string; description?: string; stateId?: number }
+): Promise<any | null> => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      console.log("❌ No hay token, devolviendo null");
+      return null;
+    }
+
+    const response = await axios.put(
+      `${TASKS_PERSONAL}/${taskId}`,
+      payload,
+      {
+        headers: { Authorization: `${token}` },
+      }
+    );
+
+    console.log("📌 Tarea personal actualizada:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.log(
+      `❌ Error al actualizar tarea personal ${taskId}:`,
+      error.response?.data || error.message
+    );
+    return null;
+  }
+};
 
 const getAuthHeaders = async (): Promise<Record<string, string> | null> => {
   const token = await AsyncStorage.getItem("token");
@@ -59,7 +115,7 @@ export const createTaskPersonal = async (payload: {
 };
 
 
-export const getTaskPersonalById = async (id: string | number): Promise<any> => {
+export const getTaskPersonalByIdD = async (id: string | number): Promise<any> => {
   if (!id) throw new Error("Id de la tarea requerido.");
   const headers = await getAuthHeaders();
   if (!headers) throw new Error("No token disponible para obtener detalle de la tarea.");
@@ -75,28 +131,6 @@ export const getTaskPersonalById = async (id: string | number): Promise<any> => 
     throw new Error(msg);
   }
 };
-
-
-export const updateTaskPersonal = async (
-  id: string | number,
-  payload: { name?: string; description?: string; stateId?: number }
-): Promise<any> => {
-  if (!id) throw new Error("Id de la tarea requerido para actualización.");
-  const headers = await getAuthHeaders();
-  if (!headers) throw new Error("No token disponible para actualizar la tarea.");
-
-  try {
-    console.log("DEBUG updateTaskPersonal id:", id, "payload:", payload);
-    const response = await axios.put(`${TASKS_PERSONAL}/${id}`, payload, { headers });
-    console.log("✅ Tarea actualizada:", response.status, response.data);
-    return response.data?.task ?? response.data ?? null;
-  } catch (error: any) {
-    console.log("❌ Error al actualizar la tarea:", error.response?.data || error.message, "status:", error.response?.status);
-    const msg = error.response?.data?.message || error.response?.data || error.message || "Error desconocido";
-    throw new Error(msg);
-  }
-};
-
 
 
 export const deleteTaskPersonal = async (id: string | number): Promise<any> => {

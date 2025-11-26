@@ -1,103 +1,137 @@
-import { Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router'; // CLAVE: useLocalSearchParams y useRouter
+// src/components/home/components/colaborador/modalinfo.tsx
+import {
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
+import {
+  NativeStackNavigationProp,
+} from "@react-navigation/native-stack";
+import React, { useEffect, useState } from "react";
+import {
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-// --- COMPONENTE PRINCIPAL ---
+import { getProjectTaskDetail } from "../../../../API/task_proyect"; // 👈 NUEVO
+import { RootStackParamList } from "../../../../navigation/types";
+
+type ModalInfoRoute = RouteProp<RootStackParamList, "ModalInfo">;
+type ModalInfoNav = NativeStackNavigationProp<
+  RootStackParamList,
+  "ModalInfo"
+>;
+
 export default function ModalInfo() {
-  const router = useRouter(); 
-  const params = useLocalSearchParams(); // <-- 1. Obtener los parámetros enviados
+  const navigation = useNavigation<ModalInfoNav>();
+  const route = useRoute<ModalInfoRoute>();
 
-  // 2. Desestructurar los datos, proporcionando valores por defecto si la navegación falla
-  const { 
-    name = "Tarea sin nombre", 
-    responsible = "Sin asignar", 
-    description = "Sin descripción", 
-    status = "Sin estado" 
-  } = params as { 
-    name: string; 
-    responsible: string; 
-    description: string; 
-    status: string; 
-  };
-  
-  // Estilos de texto consistentes con los títulos azules de tu app
-  const labelStyle = "text-blue-700 font-semibold mb-1 ml-1";
-  const valueStyle = "text-gray-800 text-base mb-4 border-b border-blue-300 pb-2";
+  const params = route.params;
+  const task = params?.task;
 
-  // Función auxiliar para obtener el nombre completo del responsable y el estado
-  const getDisplayValue = (value: string, items: { label: string, value: string }[]) => {
-    // Busca la etiqueta (label) correspondiente al valor (value) guardado
-    const item = items.find(item => item.value === value);
-    return item ? item.label : value;
-  };
+  // Valores iniciales desde params (por si no hay red, o mientras carga)
+  const initialName = task?.name ?? "Tarea sin nombre";
+  const initialResponsible = task?.responsibleName ?? "Sin asignar";
+  const initialDescription = task?.description ?? "Sin descripción";
+  const initialStatus = task?.stateName ?? "Sin estado";
 
-  // Las opciones deben ser importadas o definidas aquí (usamos las mismas que en ModalChange.tsx)
-  const RESPONSIBLE_ITEMS = [
-    { label: 'Diablo', value: 'user1' },
-    { label: 'Danna', value: 'user2' },
-    { label: 'Juanes', value: 'user3' },
-  ];
+  const [name, setName] = useState(initialName);
+  const [responsible, setResponsible] = useState(initialResponsible);
+  const [description, setDescription] = useState(initialDescription);
+  const [status, setStatus] = useState(initialStatus);
+  const [loading, setLoading] = useState(false);
 
-  const STATUS_ITEMS = [
-    { label: 'Back log', value: 'backlog' },
-    { label: 'To do', value: 'todo' },
-    { label: 'Doing', value: 'doing' },
-    { label: 'Done', value: 'done' },
-  ];
+  const labelStyle =
+    "text-blue-700 font-semibold mb-1 ml-1";
+  const valueStyle =
+    "text-gray-800 text-base mb-4 border-b border-blue-300 pb-2";
 
-  // Convertir los valores guardados (ej: 'user2') a etiquetas (ej: 'Danna')
-  const displayResponsible = getDisplayValue(responsible, RESPONSIBLE_ITEMS);
-  const displayStatus = getDisplayValue(status, STATUS_ITEMS);
+  // 🔍 Si es tarea de proyecto, traemos detalle real (incluye descripción)
+  useEffect(() => {
+    const scope = (params as any)?.scope;
+    const proyectId = (params as any)?.proyectId;
+    const taskId = (params as any)?.taskId;
 
+    if (scope !== "project" || !proyectId || !taskId) return;
+
+    let isActive = true;
+
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await getProjectTaskDetail(proyectId, taskId);
+        if (!data || !isActive) return;
+
+        setName(data.name ?? initialName);
+        setDescription(data.description ?? "Sin descripción");
+        setResponsible(
+          data.responsible?.username ?? initialResponsible,
+        );
+        setStatus(data.state ?? initialStatus);
+      } catch (err) {
+        console.log("❌ Error cargando detalle en ModalInfo:", err);
+      } finally {
+        if (isActive) setLoading(false);
+      }
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [params]);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-        <View className="flex-1 justify-center items-center p-6">
-            
-            <View 
-                className="w-full bg-white rounded-xl p-6 shadow-2xl max-w-md"
-            >
-                {/* Título */}
-                <Text className="text-2xl font-bold text-gray-800 mb-8 text-center">
-                    Información de la Tarea
-                </Text>
+      <View className="flex-1 justify-center items-center p-6">
+        <View className="w-full bg-white rounded-xl p-6 shadow-2xl max-w-md">
+          {/* Título */}
+          <Text className="text-2xl font-bold text-gray-800 mb-4 text-center">
+            Información de la Tarea
+          </Text>
 
-                {/* --- Campo Nombre --- */}
-                <Text className={labelStyle}>Nombre</Text>
-                <Text className={valueStyle}>{name}</Text>
+          {loading && (
+            <Text className="text-sm text-blue-500 mb-4 text-center">
+              Cargando información actualizada...
+            </Text>
+          )}
 
-                {/* --- Campo Responsable --- */}
-                <Text className={labelStyle}>Responsable</Text>
-                {/* Muestra el nombre completo del responsable */}
-                <Text className={valueStyle}>{displayResponsible}</Text> 
+          {/* Nombre */}
+          <Text className={labelStyle}>Nombre</Text>
+          <Text className={valueStyle}>{name}</Text>
 
-                {/* --- Campo Descripción --- */}
-                <Text className={labelStyle}>Descripción</Text>
-                <View className="border-b border-blue-300 mb-4 pb-2">
-                    <Text className="text-gray-800 text-base">
-                        {description}
-                    </Text>
-                </View>
+          {/* Responsable */}
+          <Text className={labelStyle}>Responsable</Text>
+          <Text className={valueStyle}>{responsible}</Text>
 
-                {/* --- Campo Estado --- */}
-                <Text className={labelStyle}>Estado</Text>
-                <View className="border-b border-blue-300 mb-6 pb-2">
-                    {/* Muestra la etiqueta del estado */}
-                    <Text className="text-gray-800 text-base font-bold text-blue-600"> 
-                        {displayStatus}
-                    </Text>
-                </View>
-                
+          {/* Descripción */}
+          <Text className={labelStyle}>Descripción</Text>
+          <View className="border-b border-blue-300 mb-4 pb-2">
+            <Text className="text-gray-800 text-base">
+              {description}
+            </Text>
+          </View>
 
-                {/* --- Botón de Regreso (Atrás) --- */}
-                <TouchableOpacity 
-                    className="bg-black rounded-lg p-3 w-full items-center shadow-md mt-4"
-                    onPress={() => router.back()}
-                >
-                    <Text className="text-white font-semibold">Cerrar</Text>
-                </TouchableOpacity>
-                
-            </View>
+          {/* Estado */}
+          <Text className={labelStyle}>Estado</Text>
+          <View className="border-b border-blue-300 mb-6 pb-2">
+            <Text className="text-gray-800 text-base font-bold text-blue-600">
+              {status}
+            </Text>
+          </View>
+
+          {/* Botón Cerrar */}
+          <TouchableOpacity
+            className="bg-black rounded-lg p-3 w-full items-center shadow-md mt-4"
+            onPress={() => navigation.goBack()}
+          >
+            <Text className="text-white font-semibold">
+              Cerrar
+            </Text>
+          </TouchableOpacity>
         </View>
+      </View>
     </SafeAreaView>
   );
 }

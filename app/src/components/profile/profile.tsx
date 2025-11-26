@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Alert, SafeAreaView, View } from "react-native";
-import { createTaskPersonal, deleteTaskPersonal, getTaskes, updateTaskPersonal } from "../../API/task_personal";
+import { createTaskPersonal, deleteTaskPersonal, getTaskes, updatePersonalTask } from "../../API/task_personal";
 import { AuthContext } from "../../context/userContext";
 import useAuth from "../../hook/useAuth";
 import LogoutBtn from "./componets/logoutbtn";
@@ -125,7 +125,7 @@ export default function Profile() {
   const handleUpdateTask = async (updatedTask: any) => {
     try {
       const apiPayload = mapUiToApi(updatedTask);
-      const updatedApiTask = await updateTaskPersonal(String(updatedTask.id), apiPayload);
+      const updatedApiTask = await updatePersonalTask(Number(updatedTask.id), apiPayload);
       if (updatedApiTask) {
         setPersonalTasks((prev) =>
           prev.map((t) => (String(t.id) === String(updatedApiTask.id) ? mapApiTaskToUi(updatedApiTask) : t))
