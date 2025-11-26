@@ -128,8 +128,9 @@ export default function Profile() {
       const updatedApiTask = await updatePersonalTask(Number(updatedTask.id), apiPayload);
       if (updatedApiTask) {
         setPersonalTasks((prev) =>
-          prev.map((t) => (String(t.id) === String(updatedApiTask.id) ? mapApiTaskToUi(updatedApiTask) : t))
+          prev.map((t) => (t.id == updatedApiTask.id ? mapApiTaskToUi(updatedApiTask) : t))
         );
+        setLoadingTasksFlag((v) => v + 1); // Reload tasks to reflect changes
       }
     } catch (error) {
       console.error("Update task failed:", error);
@@ -207,7 +208,8 @@ export default function Profile() {
               visible={modalVisible}
               tarea={selectedTask}
               onClose={() => setModalVisible(false)}
-              {...({ onUpdate: handleUpdateTask, onDelete: handleDeleteTask } as unknown as any)}
+              onUpdate={handleUpdateTask}
+              onDelete={handleDeleteTask}
             />
           </>
         )}
