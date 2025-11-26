@@ -17,9 +17,6 @@ export default function Manager({ refreshFlag }: { refreshFlag?: number }) {
   const { params } = useRoute();
   const { project } = params as { project: ProjectItem };
   const [integrantes, setIntegrantes] = useState<Usuario[]>([]);
-  const [nuevoIntegrante, setNuevoIntegrante] = useState<Usuario | null>(null);
-
-
   const [selectedCategory, setSelectedCategory] = useState<Categoria>("To Do");
 
   return (

@@ -14,9 +14,10 @@ type Props = {
   integrantes: Integrante[];
   setIntegrantes: React.Dispatch<React.SetStateAction<Integrante[]>>;
   nuevoIntegrante?: any;
+  rolUsuarioActual: "MANAGER" | "COLABORADOR";
 };
 
-export default function ListaIntegrantes({ projectId, integrantes, setIntegrantes }: Props) {
+export default function ListaIntegrantes({ projectId, integrantes, setIntegrantes, rolUsuarioActual }: Props) {
 
   const [showIntegrantes, setShowIntegrantes] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -165,28 +166,30 @@ export default function ListaIntegrantes({ projectId, integrantes, setIntegrante
                   </Text>
 
                 </View>
+                {rolUsuarioActual === "MANAGER" && (
+                   <View className="flex-row gap-3">
 
-                <View className="flex-row gap-3">
+                    {/* Editar */}
+                    <TouchableOpacity
+                      onPress={() => openEditModal(item)}
+                      className="px-3 py-2 rounded-xl bg-yellow-400"
+                      style={{ minWidth: 42, alignItems: "center" }}
+                    >
+                      <Text className="text-white font-bold text-lg">✏️</Text>
+                    </TouchableOpacity>
 
-                  {/* Editar */}
-                  <TouchableOpacity
-                    onPress={() => openEditModal(item)}
-                    className="px-3 py-2 rounded-xl bg-yellow-400"
-                    style={{ minWidth: 42, alignItems: "center" }}
-                  >
-                    <Text className="text-white font-bold text-lg">✏️</Text>
-                  </TouchableOpacity>
+                    {/* Eliminar */}
+                    <TouchableOpacity
+                      onPress={() => eliminarIntegrante(item.id)}
+                      className="px-3 py-2 rounded-xl bg-red-600"
+                      style={{ minWidth: 42, alignItems: "center" }}
+                    >
+                      <Text className="text-white font-bold text-lg">−</Text>
+                    </TouchableOpacity>
 
-                  {/* Eliminar */}
-                  <TouchableOpacity
-                    onPress={() => eliminarIntegrante(item.id)}
-                    className="px-3 py-2 rounded-xl bg-red-600"
-                    style={{ minWidth: 42, alignItems: "center" }}
-                  >
-                    <Text className="text-white font-bold text-lg">−</Text>
-                  </TouchableOpacity>
-
-                </View>
+                  </View>
+                )}
+                 
               </View>
             )}
           />
